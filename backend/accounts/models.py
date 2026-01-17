@@ -6,18 +6,26 @@ class User(AbstractUser):
     """
     Custom User model for ERP system
     """
+
+    # ✅ ROLE CONSTANTS (single source of truth)
+    ADMIN = 'admin'
+    MANAGER = 'manager'
+    DEVELOPER = 'developer'
+    ARTIST = 'artist'
+    QA = 'qa'
+
     ROLE_CHOICES = (
-        ('admin', 'Admin'),
-        ('manager', 'Manager'),
-        ('developer', 'Developer'),
-        ('artist', 'Artist'),
-        ('qa', 'QA'),
+        (ADMIN, 'Admin'),
+        (MANAGER, 'Manager'),
+        (DEVELOPER, 'Developer'),
+        (ARTIST, 'Artist'),
+        (QA, 'QA'),
     )
 
     role = models.CharField(
         max_length=20,
         choices=ROLE_CHOICES,
-        default='developer'
+        default=DEVELOPER
     )
 
     is_active = models.BooleanField(default=True)
