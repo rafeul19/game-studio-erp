@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from .permissions import IsAdmin, IsAdminOrManager
 
 
 @api_view(['GET'])
@@ -25,5 +26,18 @@ def profile_view(request):
         "role": user.role,
     })
 
+@api_view(['GET'])
+@permission_classes([IsAdmin])
+def admin_dashboard(request):
+    return Response({
+        "message": "Admin dashboard access granted"
+    })
 
+
+@api_view(['GET'])
+@permission_classes([IsAdminOrManager])
+def management_dashboard(request):
+    return Response({
+        "message": "Manager / Admin access granted"
+    })
 

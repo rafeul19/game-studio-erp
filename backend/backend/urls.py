@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from accounts.views import admin_dashboard, management_dashboard
 from accounts.views import health_check, profile_view
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -24,6 +25,7 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
 
     # Health
     path('api/health/', health_check),
@@ -34,6 +36,10 @@ urlpatterns = [
     # JWT
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # Protected
+    path('api/admin/dashboard/', admin_dashboard),
+    path('api/management/dashboard/', management_dashboard),
 ]
 
 
