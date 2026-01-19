@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from erp_projects.views import create_project, my_projects
+from erp_projects.views import create_task, my_tasks, update_task_status
 from accounts.views import admin_dashboard, management_dashboard
 from accounts.views import health_check, profile_view
 from rest_framework_simplejwt.views import (
@@ -40,6 +42,16 @@ urlpatterns = [
     # Protected
     path('api/admin/dashboard/', admin_dashboard),
     path('api/management/dashboard/', management_dashboard),
+    #ERp Projects
+    path('api/projects/create/', create_project),
+    path('api/projects/my/', my_projects),
+
+    # Tasks
+    path('api/tasks/create/', create_task),
+    path('api/tasks/my/', my_tasks),
+    path('api/tasks/<int:task_id>/status/', update_task_status),
+
+
 ]
 
 
