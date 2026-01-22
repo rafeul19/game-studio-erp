@@ -12,11 +12,12 @@ import {
   Typography,
   Card,
   Tag,
-  message,
+  App,
 } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useGetProjectsQuery, useCreateProjectMutation } from '@/store/api/projectApi';
+import { Project } from '@/types/models';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -26,6 +27,7 @@ export default function ProjectsPage() {
   const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
+  const { message } = App.useApp();
 
   const showModal = () => setIsModalVisible(true);
   const handleCancel = () => {
@@ -33,7 +35,7 @@ export default function ProjectsPage() {
     form.resetFields();
   };
 
-  const onFinish = async (values: Record<string, any>) => {
+  const onFinish = async (values: Partial<Project>) => {
     try {
       await createProject(values).unwrap();
       message.success('Project created successfully');
@@ -71,7 +73,7 @@ export default function ProjectsPage() {
     {
         title: 'Actions',
         key: 'actions',
-        render: (_: unknown, record: { name: string }) => (
+        render: (_: unknown, record: Project) => (
           <Space size="middle">
             <Button type="text" icon={<EyeOutlined />} onClick={() => message.info(`Viewing ${record.name}`)} />
             <Button type="text" icon={<EditOutlined />} />

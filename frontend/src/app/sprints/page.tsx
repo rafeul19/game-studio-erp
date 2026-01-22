@@ -16,9 +16,9 @@ import {
   Input,
   DatePicker,
   Select,
-  message,
   Alert,
   Statistic,
+  App,
 } from 'antd';
 import {
   PlusOutlined,
@@ -61,6 +61,7 @@ export default function SprintsPage() {
   const [createSprint, { isLoading: isCreating }] = useCreateSprintMutation();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
+  const { message } = App.useApp();
 
   const handleProjectChange = (value: number) => {
     setSelectedProjectId(value);

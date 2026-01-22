@@ -12,8 +12,11 @@ class Project(models.Model):
     )
     members = models.ManyToManyField(
         User,
+        blank=True,
         related_name='projects'
     )
+    budget_type = models.CharField(max_length=20, choices=[('FIXED', 'Fixed Budget'), ('T&M', 'Time & Materials')], default='FIXED')
+    total_budget = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -75,11 +78,13 @@ class Sprint(models.Model):
 class Task(models.Model):
     TODO = 'TODO'
     IN_PROGRESS = 'IN_PROGRESS'
+    REVIEW = 'REVIEW'
     DONE = 'DONE'
 
     STATUS_CHOICES = [
         (TODO, 'To Do'),
         (IN_PROGRESS, 'In Progress'),
+        (REVIEW, 'Review'),
         (DONE, 'Done'),
     ]
 
@@ -93,12 +98,19 @@ class Task(models.Model):
     assigned_to = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='tasks'
+        related_name='tasks',
+        null=True,
+        blank=True
     )
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
         default=TODO
+    )
+    priority = models.CharField(
+        max_length=20,
+        choices=[('LOW', 'Low'), ('MEDIUM', 'Medium'), ('HIGH', 'High'), ('URGENT', 'Urgent')],
+        default='MEDIUM'
     )
     due_date = models.DateField(null=True, blank=True)
     sprint = models.ForeignKey(

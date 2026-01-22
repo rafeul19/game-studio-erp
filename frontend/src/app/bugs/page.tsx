@@ -13,10 +13,10 @@ import {
   Form,
   Input,
   Select,
-  message,
   Dropdown,
   Avatar,
   Tooltip,
+  App,
 } from 'antd';
 import {
   PlusOutlined,
@@ -47,6 +47,7 @@ export default function BugsPage() {
   
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
+  const { message } = App.useApp();
 
   const handleStatusChange = async (bugId: number, newStatus: Bug['status']) => {
     try {

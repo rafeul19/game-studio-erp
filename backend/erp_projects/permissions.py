@@ -7,13 +7,14 @@ class IsAdminOrManager(BasePermission):
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated and
-            request.user.role in [User.ADMIN, User.MANAGER]
+            (request.user.role in [User.ADMIN, User.MANAGER] or request.user.is_superuser)
         )
 
 
 class IsProjectMember(BasePermission):
     def has_object_permission(self, request, view, obj):
         return (
+            request.user.is_superuser or
             request.user == obj.owner or
             request.user in obj.members.all()
         )
@@ -22,20 +23,20 @@ class CanCreateTask(BasePermission):
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated and
-            request.user.role in [User.ADMIN, User.MANAGER]
+            (request.user.role in [User.ADMIN, User.MANAGER] or request.user.is_superuser)
         )
 
 class CanManageSprint(BasePermission):
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated and
-            request.user.role in [User.ADMIN, User.MANAGER]
+            (request.user.role in [User.ADMIN, User.MANAGER] or request.user.is_superuser)
         )
 
 class CanUpdateTask(BasePermission):
     def has_object_permission(self, request, view, obj):
-        # Admin / Manager can update any task
-        if request.user.role in [User.ADMIN, User.MANAGER]:
+        # Admin / Manager / Superuser can update any task
+        if request.user.is_superuser or request.user.role in [User.ADMIN, User.MANAGER]:
             return True
 
         # Others can update ONLY their own tasks
@@ -51,6 +52,7 @@ class IsProjectObjectMember(BasePermission):
         if not project:
             return False
         return (
+            request.user.is_superuser or
             request.user == project.owner or
             request.user in project.members.all()
         )
@@ -64,14 +66,15 @@ class CanManageProjectObject(BasePermission):
         if not project:
             return False
         return (
+            request.user.is_superuser or
             request.user.role in [User.ADMIN, User.MANAGER] or
             request.user == project.owner
         )
 
 class CanUpdateBug(BasePermission):
     def has_object_permission(self, request, view, obj):
-        # Admin / Manager can update any bug
-        if request.user.role in [User.ADMIN, User.MANAGER]:
+        # Admin / Manager / Superuser can update any bug
+        if request.user.is_superuser or request.user.role in [User.ADMIN, User.MANAGER]:
             return True
         # Assigned user or reporter can update
         return obj.assignee == request.user or obj.reporter == request.user

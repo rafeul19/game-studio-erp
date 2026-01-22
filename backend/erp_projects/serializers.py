@@ -5,8 +5,8 @@ from accounts.models import User
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['id', 'name', 'description', 'owner', 'members', 'created_at', 'progress_percentage']
-        read_only_fields = ['owner', 'created_at']
+        fields = ['id', 'name', 'description', 'owner', 'members', 'budget_type', 'total_budget', 'created_at', 'progress_percentage']
+        read_only_fields = ['owner', 'created_at', 'progress_percentage']
 
 class SprintSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,7 +17,7 @@ class SprintSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'project', 'assigned_to', 'status', 'due_date', 'sprint', 'story_points', 'created_at']
+        fields = ['id', 'title', 'description', 'project', 'assigned_to', 'status', 'priority', 'due_date', 'sprint', 'story_points', 'created_at']
         read_only_fields = ['created_at']
 
 class WorkLogSerializer(serializers.ModelSerializer):

@@ -15,8 +15,8 @@ import {
   Form,
   Input,
   Select,
-  message,
   Dropdown,
+  App,
 } from 'antd';
 import {
   PlusOutlined,
@@ -58,6 +58,8 @@ export default function TasksPage() {
   const [createTask, { isLoading: isCreating }] = useCreateTaskMutation();
   const [logWork, { isLoading: isLogging }] = useLogWorkMutation();
   
+  const { message } = App.useApp();
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLogWorkVisible, setIsLogWorkVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);

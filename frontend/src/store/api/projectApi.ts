@@ -58,7 +58,7 @@ export const projectApi = baseApi.injectEndpoints({
       }),
     }),
     sprintCapacityPlanning: builder.query<CapacityResponse, number>({
-      query: (projectId) => `projects/${projectId}/capacity/`,
+      query: (projectId) => `projects/${projectId}/suggested-capacity/`,
     }),
   }),
 });

@@ -13,9 +13,9 @@ import {
   Select,
   Modal,
   Form,
-  message,
   Empty,
   Badge,
+  App,
 } from 'antd';
 import {
   PlusOutlined,
@@ -46,6 +46,7 @@ export default function AssetsPage() {
   const [filterType, setFilterType] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [form] = Form.useForm();
+  const { message } = App.useApp();
   
   const [detectReuse, { data: reuseSuggestions }] = useDetectAssetReuseMutation();
   const [selectedProject, setSelectedProject] = useState<number | null>(null);

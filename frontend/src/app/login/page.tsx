@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Form, Input, Button, Card, Typography, Checkbox, message } from 'antd';
+import { Form, Input, Button, Card, Typography, Checkbox, App } from 'antd';
 import { UserOutlined, LockOutlined, DeploymentUnitOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import { useLoginMutation } from '@/store/api/authApi';
@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [login, { isLoading }] = useLoginMutation();
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const { message } = App.useApp();
 
   const onFinish = async (values: Record<string, any>) => {
     try {
