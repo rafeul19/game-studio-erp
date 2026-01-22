@@ -121,10 +121,83 @@ def productivity_report(request):
     for user in users:
         total = user.tasks.count()
         done = user.tasks.filter(status='DONE').count()
+        total_points = sum(t.story_points for t in user.tasks.all())
+        done_points = sum(t.story_points for t in user.tasks.filter(status='DONE'))
+        
         report.append({
             "username": user.username,
             "total_tasks": total,
             "completed_tasks": done,
-            "productivity": int((done / total * 100)) if total > 0 else 0
+            "total_story_points": total_points,
+            "completed_story_points": done_points,
+            "productivity_score": int((done_points / total_points * 100)) if total_points > 0 else 0
         })
     return Response(report)
+
+# --- AI Features ---
+
+@api_view(['POST'])
+@permission_classes([IsAdminOrManager])
+def suggest_task_story_points(request):
+    title = request.data.get('title', '')
+    description = request.data.get('description', '')
+    from .ai_service import AIEstimationService
+    points = AIEstimationService.suggest_story_points(title, description)
+    return Response({"suggested_points": points})
+
+@api_view(['GET'])
+@permission_classes([IsAdminOrManager])
+def predict_sprint_risk(request, sprint_id):
+    sprint = get_object_or_404(Sprint, id=sprint_id)
+    from .ai_service import AIEstimationService
+    risk = AIEstimationService.predict_sprint_risk(sprint)
+    return Response({
+        "sprint": sprint.name,
+        "risk_level": risk
+    })
+
+@api_view(['POST'])
+@permission_classes([IsAdminOrManager])
+def detect_asset_reuse_api(request):
+    project_id = request.data.get('project_id')
+    project = get_object_or_404(Project, id=project_id)
+    task_title = request.data.get('title', '')
+    from .ai_service import AIEstimationService
+    matches = AIEstimationService.detect_asset_reuse(project, task_title)
+    return Response({"potential_reuse": matches})
+
+@api_view(['GET'])
+@permission_classes([IsAdminOrManager])
+def sprint_capacity_planning_api(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    from .ai_service import AIEstimationService
+    capacity = AIEstimationService.calculate_sprint_capacity(project)
+    return Response({
+        "project": project.name,
+        "suggested_sprint_capacity": capacity
+    })
+
+# --- Time & Ownership ---
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def log_work(request):
+    serializer = WorkLogSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(user=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def transfer_project_ownership(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    if project.owner != request.user and request.user.role != User.ADMIN:
+        return Response({"error": "Only project owner or admin can transfer ownership"}, status=status.HTTP_403_FORBIDDEN)
+    
+    new_owner_id = request.data.get('new_owner_id')
+    new_owner = get_object_or_404(User, id=new_owner_id)
+    
+    project.owner = new_owner
+    project.save()
+    return Response({"message": f"Ownership transferred to {new_owner.username}"})

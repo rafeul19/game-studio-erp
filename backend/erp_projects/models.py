@@ -63,6 +63,14 @@ class Sprint(models.Model):
         done = self.tasks.filter(status='DONE').count()
         return int((done / total) * 100)
 
+    def total_story_points(self):
+        return sum(task.story_points for task in self.tasks.all())
+
+    def velocity(self):
+        if self.status != Sprint.COMPLETED:
+            return 0
+        return sum(task.story_points for task in self.tasks.filter(status='DONE'))
+
 
 class Task(models.Model):
     TODO = 'TODO'
@@ -100,7 +108,28 @@ class Task(models.Model):
         blank=True,
         related_name='tasks'
     )
+    story_points = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
+
+
+class WorkLog(models.Model):
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+        related_name='worklogs'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='worklogs'
+    )
+    hours = models.DecimalField(max_digits=5, decimal_places=2)
+    description = models.TextField(blank=True)
+    is_billable = models.BooleanField(default=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.task.title} - {self.hours} hrs"

@@ -21,6 +21,12 @@ from erp_projects.views import (
     sprint_progress,
     project_sprints,
     productivity_report,
+    suggest_task_story_points,
+    predict_sprint_risk,
+    detect_asset_reuse_api,
+    sprint_capacity_planning_api,
+    log_work,
+    transfer_project_ownership,
 )
 
 urlpatterns = [
@@ -43,16 +49,22 @@ urlpatterns = [
     path('api/projects/my/', my_projects),
     path('api/projects/<int:project_id>/progress/', project_progress),
     path('api/projects/<int:project_id>/sprints/', project_sprints),
+    path('api/projects/<int:project_id>/transfer/', transfer_project_ownership),
 
     # Tasks
     path('api/tasks/create/', create_task),
     path('api/tasks/my/', my_tasks),
     path('api/tasks/<int:task_id>/status/', update_task_status),
     path('api/tasks/overdue/', overdue_tasks),
+    path('api/tasks/suggest-points/', suggest_task_story_points),
+    path('api/tasks/asset-reuse/', detect_asset_reuse_api),
+    path('api/tasks/log-work/', log_work),
 
     # Sprints
     path('api/sprints/create/', create_sprint),
     path('api/sprints/<int:sprint_id>/progress/', sprint_progress),
+    path('api/sprints/<int:sprint_id>/risk/', predict_sprint_risk),
+    path('api/projects/<int:project_id>/suggested-capacity/', sprint_capacity_planning_api),
 
     # Reports
     path('api/reports/productivity/', productivity_report),

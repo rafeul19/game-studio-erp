@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, Sprint, Task
+from .models import Project, Sprint, Task, WorkLog
 from accounts.models import User
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -17,5 +17,11 @@ class SprintSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'project', 'assigned_to', 'status', 'due_date', 'sprint', 'created_at']
+        fields = ['id', 'title', 'description', 'project', 'assigned_to', 'status', 'due_date', 'sprint', 'story_points', 'created_at']
         read_only_fields = ['created_at']
+
+class WorkLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkLog
+        fields = ['id', 'task', 'user', 'hours', 'description', 'is_billable', 'timestamp']
+        read_only_fields = ['user', 'timestamp']

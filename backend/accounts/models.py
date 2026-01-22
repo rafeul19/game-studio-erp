@@ -32,3 +32,5 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+from .permissions_models import RoleAction, ProjectRoleOverride
