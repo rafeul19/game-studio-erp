@@ -43,6 +43,10 @@ INSTALLED_APPS = [
 
     # Third-party
     'rest_framework',
+
+    # Internal
+    'activity_logs',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -53,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'activity_logs.middleware.CurrentUserMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'

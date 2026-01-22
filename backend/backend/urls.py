@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from accounts.views import (
@@ -56,4 +56,10 @@ urlpatterns = [
 
     # Reports
     path('api/reports/productivity/', productivity_report),
+
+    # Audit
+    path('', include('activity_logs.urls')),
+
+    # Notifications
+    path('', include('notifications.urls')),
 ]
