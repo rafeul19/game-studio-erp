@@ -31,13 +31,11 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import {
   useGetProjectSprintsQuery,
   useCreateSprintMutation,
-  useGetSprintRiskQuery,
 } from '@/store/api/sprintApi';
 import { useGetProjectsQuery } from '@/store/api/projectApi';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
-const { Option } = Select;
 
 export default function SprintsPage() {
   const { data: projects } = useGetProjectsQuery({});
@@ -53,7 +51,7 @@ export default function SprintsPage() {
     setSelectedProjectId(value);
   };
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: { dates: any[]; [key: string]: any }) => {
     try {
       const payload = {
         ...values,
@@ -65,7 +63,7 @@ export default function SprintsPage() {
       message.success('Sprint created successfully');
       setIsModalVisible(false);
       form.resetFields();
-    } catch (err) {
+    } catch {
       message.error('Failed to create sprint');
     }
   };
@@ -87,14 +85,14 @@ export default function SprintsPage() {
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
-        const colors: any = { ACTIVE: 'blue', COMPLETED: 'green', PLANNED: 'default' };
+        const colors: Record<string, string> = { ACTIVE: 'blue', COMPLETED: 'green', PLANNED: 'default' };
         return <Tag color={colors[status] || 'default'}>{status}</Tag>;
       },
     },
     {
       title: 'AI Risk',
       key: 'risk',
-      render: (_: any, record: any) => {
+      render: () => {
         // This would ideally come from the useGetSprintRiskQuery
         // For demonstration, we'll show a sample AI risk badge
         return (
@@ -107,7 +105,7 @@ export default function SprintsPage() {
     {
       title: 'Progress',
       key: 'progress',
-      render: (_: any, record: any) => (
+      render: (_: unknown, record: { completion_percentage?: number }) => (
         <Progress percent={record.completion_percentage || 0} size="small" />
       ),
     },
@@ -125,7 +123,7 @@ export default function SprintsPage() {
             placeholder="Select a project"
             style={{ width: 250 }}
             onChange={handleProjectChange}
-            options={projects?.map((p: any) => ({ label: p.name, value: p.id }))}
+            options={projects?.map((p: { name: string; id: number }) => ({ label: p.name, value: p.id }))}
           />
           <Button
             type="primary"
@@ -141,7 +139,7 @@ export default function SprintsPage() {
 
       {!selectedProjectId ? (
         <Alert
-          message="No Project Selected"
+          title="No Project Selected"
           description="Please select a project from the dropdown above to view and manage sprints."
           type="info"
           showIcon
@@ -183,7 +181,7 @@ export default function SprintsPage() {
             </Col>
           </Row>
 
-          <Card bordered={false} className="shadow-sm">
+          <Card variant="borderless" className="shadow-sm">
             <Table
               dataSource={sprints}
               columns={columns}
@@ -200,7 +198,7 @@ export default function SprintsPage() {
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={form}

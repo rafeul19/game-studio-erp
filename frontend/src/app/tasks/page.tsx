@@ -22,7 +22,6 @@ import {
   PlusOutlined,
   MoreOutlined,
   UserOutlined,
-  ClockCircleOutlined,
   FireOutlined,
 } from '@ant-design/icons';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -52,18 +51,18 @@ export default function TasksPage() {
     try {
       await updateStatus({ id: taskId, status: newStatus }).unwrap();
       message.success('Task updated');
-    } catch (err) {
+    } catch {
       message.error('Failed to update task');
     }
   };
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: Record<string, any>) => {
     try {
       await createTask(values).unwrap();
       message.success('Task created successfully');
       setIsModalVisible(false);
       form.resetFields();
-    } catch (err) {
+    } catch {
       message.error('Failed to create task');
     }
   };
@@ -105,19 +104,19 @@ export default function TasksPage() {
                   <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: column.color }} />
                   <Text strong>{column.title}</Text>
                   <Tag className="rounded-full px-2 border-none bg-gray-200 dark:bg-gray-700">
-                    {tasks?.filter((t: any) => t.status === column.id).length || 0}
+                    {tasks?.filter((t: { status: string }) => t.status === column.id).length || 0}
                   </Tag>
                 </Space>
                 <Button type="text" size="small" icon={<MoreOutlined />} />
               </div>
 
               <div className="flex-1 space-y-3">
-                {tasks?.filter((t: any) => t.status === column.id).map((task: any) => (
+                {tasks?.filter((t: { status: string }) => t.status === column.id).map((task: { id: number; priority: string; title: string; assignee_name?: string; assignee_avatar?: string; story_points?: number }) => (
                   <Card
                     key={task.id}
                     size="small"
                     className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                    bordered={false}
+                    variant="borderless"
                   >
                     <div className="mb-2">
                        <Tag color={getPriorityColor(task.priority)} className="text-[10px] uppercase font-bold px-1.5 leading-tight">
@@ -161,7 +160,7 @@ export default function TasksPage() {
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={form}
@@ -181,7 +180,7 @@ export default function TasksPage() {
              <Col span={12}>
                 <Form.Item name="project" label="Project" rules={[{ required: true }]}>
                   <Select placeholder="Select project">
-                    {projects?.map((p: any) => (
+                    {projects?.map((p: { id: number; name: string }) => (
                       <Option key={p.id} value={p.id}>{p.name}</Option>
                     ))}
                   </Select>

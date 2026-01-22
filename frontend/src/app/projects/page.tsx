@@ -12,7 +12,6 @@ import {
   Typography,
   Card,
   Tag,
-  Progress,
   message,
 } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
@@ -34,13 +33,13 @@ export default function ProjectsPage() {
     form.resetFields();
   };
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: Record<string, any>) => {
     try {
       await createProject(values).unwrap();
       message.success('Project created successfully');
       setIsModalVisible(false);
       form.resetFields();
-    } catch (err) {
+    } catch {
       message.error('Failed to create project');
     }
   };
@@ -72,7 +71,7 @@ export default function ProjectsPage() {
     {
         title: 'Actions',
         key: 'actions',
-        render: (_: any, record: any) => (
+        render: (_: unknown, record: { name: string }) => (
           <Space size="middle">
             <Button type="text" icon={<EyeOutlined />} onClick={() => message.info(`Viewing ${record.name}`)} />
             <Button type="text" icon={<EditOutlined />} />
@@ -87,7 +86,7 @@ export default function ProjectsPage() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <Title level={2}>Projects</Title>
-          <Text type="secondary">Manage your studio's game projects and resources</Text>
+          <Text type="secondary">Manage your studio&apos;s game projects and resources</Text>
         </div>
         <Button
           type="primary"
@@ -100,7 +99,7 @@ export default function ProjectsPage() {
         </Button>
       </div>
 
-      <Card bordered={false} className="shadow-sm">
+      <Card variant="borderless" className="shadow-sm">
         <Table
           dataSource={projects}
           columns={columns}
@@ -114,7 +113,7 @@ export default function ProjectsPage() {
         open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={form}
