@@ -22,6 +22,8 @@ import {
   LogoutOutlined,
   BellOutlined,
   SettingOutlined,
+  FileSearchOutlined,
+  BugOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -66,6 +68,16 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
       key: '/sprints',
       icon: <DeploymentUnitOutlined />,
       label: 'Sprints',
+    },
+    {
+      key: '/assets',
+      icon: <FileSearchOutlined />,
+      label: 'Assets',
+    },
+    {
+      key: '/bugs',
+      icon: <BugOutlined />,
+      label: 'Bugs',
     },
     {
       key: '/settings',
