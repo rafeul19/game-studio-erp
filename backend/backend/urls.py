@@ -74,4 +74,8 @@ urlpatterns = [
 
     # Notifications
     path('', include('notifications.urls')),
+    
+    # Core Modules (Phase 2)
+    path('api/', include('assets.urls')),
+    path('api/', include('bugs.urls')),
 ]

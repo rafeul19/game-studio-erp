@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     # Internal
     'activity_logs',
     'notifications',
+    'assets',
+    'bugs',
 ]
 
 MIDDLEWARE = [
