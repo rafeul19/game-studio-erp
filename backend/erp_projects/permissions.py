@@ -24,6 +24,12 @@ class CanCreateTask(BasePermission):
             request.user.role in [User.ADMIN, User.MANAGER]
         )
 
+class CanManageSprint(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated and
+            request.user.role in [User.ADMIN, User.MANAGER]
+        )
 
 class CanUpdateTask(BasePermission):
     def has_object_permission(self, request, view, obj):
