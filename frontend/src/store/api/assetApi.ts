@@ -2,14 +2,14 @@ import { baseApi } from './baseApi';
 
 export const assetApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAssets: builder.query<any[], any>({
+    getAssets: builder.query<Record<string, any>[], Record<string, any>>({
       query: (params) => ({
         url: 'assets/',
         params,
       }),
       providesTags: ['Asset'],
     }),
-    createAsset: builder.mutation<any, any>({
+    createAsset: builder.mutation<Record<string, any>, Record<string, any>>({
       query: (data) => ({
         url: 'assets/',
         method: 'POST',
@@ -17,7 +17,7 @@ export const assetApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Asset'],
     }),
-    addAssetVersion: builder.mutation<any, { assetId: number; data: any }>({
+    addAssetVersion: builder.mutation<Record<string, any>, { assetId: number; data: Record<string, any> }>({
       query: ({ assetId, data }) => ({
         url: `assets/${assetId}/add_version/`,
         method: 'POST',

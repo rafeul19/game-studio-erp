@@ -45,7 +45,7 @@ export default function AssetsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [form] = Form.useForm();
 
-  const handleCreate = async (values: any) => {
+  const handleCreate = async (values: Record<string, any>) => {
     try {
       await createAsset(values).unwrap();
       message.success('Asset created successfully');
@@ -65,7 +65,7 @@ export default function AssetsPage() {
     }
   };
 
-  const filteredAssets = assets?.filter((asset: any) => {
+  const filteredAssets = assets?.filter((asset: Record<string, any>) => {
     const matchesPath = asset.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                       asset.tags.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = filterType ? asset.asset_type === filterType : true;
@@ -128,7 +128,7 @@ export default function AssetsPage() {
         </Card>
       ) : (
         <Row gutter={[16, 16]}>
-          {filteredAssets?.map((asset: any) => (
+          {filteredAssets?.map((asset: Record<string, any>) => (
             <Col xs={24} sm={12} lg={6} xl={4} key={asset.id}>
               <Card
                 hoverable
@@ -152,7 +152,7 @@ export default function AssetsPage() {
                   }
                   description={
                     <div className="space-y-1 mt-2">
-                      <Tag size="small">{asset.asset_type}</Tag>
+                      <Tag>{asset.asset_type}</Tag>
                       <Text type="secondary" className="block text-xs truncate">
                         {asset.project_name}
                       </Text>
@@ -195,7 +195,7 @@ export default function AssetsPage() {
              <Col span={12}>
                 <Form.Item name="project" label="Project" rules={[{ required: true }]}>
                    <Select placeholder="Select project">
-                     {projects?.map((p: any) => (
+                     {projects?.map((p: { id: number; name: string }) => (
                        <Option key={p.id} value={p.id}>{p.name}</Option>
                      ))}
                    </Select>

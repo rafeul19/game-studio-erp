@@ -23,7 +23,6 @@ import {
   BugOutlined,
   MoreOutlined,
   UserOutlined,
-  WarningOutlined,
 } from '@ant-design/icons';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useGetBugsQuery, useCreateBugMutation, useUpdateBugMutation } from '@/store/api/bugApi';
@@ -40,7 +39,7 @@ const BUG_COLUMNS = [
 ];
 
 export default function BugsPage() {
-  const { data: bugs, isLoading } = useGetBugsQuery({});
+  const { data: bugs } = useGetBugsQuery({});
   const { data: projects } = useGetProjectsQuery({});
   const [createBug, { isLoading: isCreating }] = useCreateBugMutation();
   const [updateBug] = useUpdateBugMutation();
@@ -57,7 +56,7 @@ export default function BugsPage() {
     }
   };
 
-  const handleCreate = async (values: any) => {
+  const handleCreate = async (values: Record<string, any>) => {
     try {
       await createBug(values).unwrap();
       message.success('Bug reported successfully');
@@ -106,14 +105,14 @@ export default function BugsPage() {
                   <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: column.color }} />
                   <Text strong>{column.title}</Text>
                   <Tag className="rounded-full px-2 border-none bg-gray-200 dark:bg-gray-700">
-                    {bugs?.filter((b: any) => b.status === column.id).length || 0}
+                    {bugs?.filter((b: Record<string, any>) => b.status === column.id).length || 0}
                   </Tag>
                 </Space>
                 <Button type="text" size="small" icon={<MoreOutlined />} />
               </div>
 
               <div className="flex-1 space-y-3">
-                {bugs?.filter((b: any) => b.status === column.id).map((bug: any) => (
+                {bugs?.filter((b: Record<string, any>) => b.status === column.id).map((bug: Record<string, any>) => (
                   <Card
                     key={bug.id}
                     size="small"
@@ -194,7 +193,7 @@ export default function BugsPage() {
              <Col span={12}>
                 <Form.Item name="project" label="Project" rules={[{ required: true }]}>
                   <Select placeholder="Select project">
-                    {projects?.map((p: any) => (
+                    {projects?.map((p: { id: number; name: string }) => (
                       <Option key={p.id} value={p.id}>{p.name}</Option>
                     ))}
                   </Select>
