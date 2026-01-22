@@ -28,14 +28,29 @@ import {
   RobotOutlined,
 } from '@ant-design/icons';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { RiskBadge } from '@/components/common/RiskBadge';
 import {
   useGetProjectSprintsQuery,
   useCreateSprintMutation,
 } from '@/store/api/sprintApi';
-import { useGetProjectsQuery } from '@/store/api/projectApi';
+import { useGetProjectsQuery, useSprintCapacityPlanningQuery } from '@/store/api/projectApi';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
+
+const CapacitySuggestion = ({ projectId }: { projectId: number | null }) => {
+  const { data, isLoading } = useSprintCapacityPlanningQuery(projectId as number, { skip: !projectId });
+  if (!projectId || isLoading) return null;
+  const capacity = data?.suggested_sprint_capacity as number | string;
+  return (
+    <div className="mb-4 bg-blue-50 dark:bg-blue-950/30 p-2 rounded border border-blue-100 dark:border-blue-900">
+      <Space>
+        <RobotOutlined className="text-blue-500" />
+        <Text className="text-xs">AI Suggested Capacity: <Text strong>{capacity}</Text> story points</Text>
+      </Space>
+    </div>
+  );
+};
 
 export default function SprintsPage() {
   const { data: projects } = useGetProjectsQuery({});
@@ -51,13 +66,14 @@ export default function SprintsPage() {
     setSelectedProjectId(value);
   };
 
-  const onFinish = async (values: { dates: any[]; [key: string]: any }) => {
+  const onFinish = async (values: Record<string, unknown>) => {
     try {
+      const dates = values.dates as any[];
       const payload = {
         ...values,
         project: selectedProjectId,
-        start_date: values.dates[0].format('YYYY-MM-DD'),
-        end_date: values.dates[1].format('YYYY-MM-DD'),
+        start_date: dates[0].format('YYYY-MM-DD'),
+        end_date: dates[1].format('YYYY-MM-DD'),
       };
       await createSprint(payload).unwrap();
       message.success('Sprint created successfully');
@@ -78,7 +94,7 @@ export default function SprintsPage() {
     {
       title: 'Duration',
       key: 'duration',
-      render: (_: any, record: any) => `${record.start_date} to ${record.end_date}`,
+      render: (_: unknown, record: Record<string, unknown>) => `${record.start_date} to ${record.end_date}`,
     },
     {
       title: 'Status',
@@ -92,15 +108,7 @@ export default function SprintsPage() {
     {
       title: 'AI Risk',
       key: 'risk',
-      render: () => {
-        // This would ideally come from the useGetSprintRiskQuery
-        // For demonstration, we'll show a sample AI risk badge
-        return (
-          <Space>
-            <Tag icon={<RobotOutlined />} color="orange">MEDIUM RISK</Tag>
-          </Space>
-        );
-      },
+      render: (_: unknown, record: Record<string, unknown>) => <RiskBadge sprintId={record.id as number} />,
     },
     {
       title: 'Progress',
@@ -200,6 +208,7 @@ export default function SprintsPage() {
         footer={null}
         destroyOnHidden
       >
+        <CapacitySuggestion projectId={selectedProjectId} />
         <Form
           form={form}
           layout="vertical"

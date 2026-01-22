@@ -3,11 +3,17 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Asset, AssetVersion
 from .serializers import AssetSerializer, AssetVersionSerializer
+from erp_projects.permissions import IsProjectObjectMember, CanManageProjectObject
 
 class AssetViewSet(viewsets.ModelViewSet):
     queryset = Asset.objects.all()
     serializer_class = AssetSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsProjectObjectMember]
+
+    def get_permissions(self):
+        if self.action in ['destroy', 'add_version']:
+            return [permissions.IsAuthenticated(), CanManageProjectObject()]
+        return super().get_permissions()
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

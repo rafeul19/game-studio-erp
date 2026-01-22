@@ -1,15 +1,16 @@
 import { baseApi } from './baseApi';
+import { Bug } from '@/types/models';
 
 export const bugApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getBugs: builder.query<Record<string, any>[], Record<string, any>>({
+    getBugs: builder.query<Bug[], Partial<Bug>>({
       query: (params) => ({
         url: 'bugs/',
         params,
       }),
       providesTags: ['Bug'],
     }),
-    createBug: builder.mutation<Record<string, any>, Record<string, any>>({
+    createBug: builder.mutation<Bug, Partial<Bug>>({
       query: (data) => ({
         url: 'bugs/',
         method: 'POST',
@@ -17,7 +18,7 @@ export const bugApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Bug'],
     }),
-    updateBug: builder.mutation<Record<string, any>, { id: number; data: Record<string, any> }>({
+    updateBug: builder.mutation<Bug, { id: number; data: Partial<Bug> }>({
       query: ({ id, data }) => ({
         url: `bugs/${id}/`,
         method: 'PATCH',

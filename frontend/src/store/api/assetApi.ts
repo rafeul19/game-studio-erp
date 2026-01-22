@@ -1,15 +1,16 @@
 import { baseApi } from './baseApi';
+import { Asset, AssetVersion } from '@/types/models';
 
 export const assetApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAssets: builder.query<Record<string, any>[], Record<string, any>>({
+    getAssets: builder.query<Asset[], Partial<Asset>>({
       query: (params) => ({
         url: 'assets/',
         params,
       }),
       providesTags: ['Asset'],
     }),
-    createAsset: builder.mutation<Record<string, any>, Record<string, any>>({
+    createAsset: builder.mutation<Asset, Partial<Asset>>({
       query: (data) => ({
         url: 'assets/',
         method: 'POST',
@@ -17,7 +18,7 @@ export const assetApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Asset'],
     }),
-    addAssetVersion: builder.mutation<Record<string, any>, { assetId: number; data: Record<string, any> }>({
+    addAssetVersion: builder.mutation<AssetVersion, { assetId: number; data: Partial<AssetVersion> }>({
       query: ({ assetId, data }) => ({
         url: `assets/${assetId}/add_version/`,
         method: 'POST',

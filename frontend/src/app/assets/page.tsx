@@ -27,10 +27,12 @@ import {
   FileTextOutlined,
   DownloadOutlined,
   HistoryOutlined,
+  WarningOutlined,
 } from '@ant-design/icons';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useGetAssetsQuery, useCreateAssetMutation } from '@/store/api/assetApi';
-import { useGetProjectsQuery } from '@/store/api/projectApi';
+import { useGetProjectsQuery, useDetectAssetReuseMutation, AssetReuseSuggestion } from '@/store/api/projectApi';
+import { Asset } from '@/types/models';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -44,8 +46,18 @@ export default function AssetsPage() {
   const [filterType, setFilterType] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [form] = Form.useForm();
+  
+  const [detectReuse, { data: reuseSuggestions }] = useDetectAssetReuseMutation();
+  const [selectedProject, setSelectedProject] = useState<number | null>(null);
 
-  const handleCreate = async (values: Record<string, any>) => {
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    if (name.length > 3 && selectedProject) {
+      detectReuse({ project_id: selectedProject, title: name });
+    }
+  };
+
+  const handleCreate = async (values: Partial<Asset>) => {
     try {
       await createAsset(values).unwrap();
       message.success('Asset created successfully');
@@ -65,7 +77,7 @@ export default function AssetsPage() {
     }
   };
 
-  const filteredAssets = assets?.filter((asset: Record<string, any>) => {
+  const filteredAssets = assets?.filter((asset: Asset) => {
     const matchesPath = asset.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                       asset.tags.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = filterType ? asset.asset_type === filterType : true;
@@ -128,7 +140,7 @@ export default function AssetsPage() {
         </Card>
       ) : (
         <Row gutter={[16, 16]}>
-          {filteredAssets?.map((asset: Record<string, any>) => (
+          {filteredAssets?.map((asset: Asset & { project_name?: string; latest_version?: any }) => (
             <Col xs={24} sm={12} lg={6} xl={4} key={asset.id}>
               <Card
                 hoverable
@@ -182,14 +194,36 @@ export default function AssetsPage() {
           layout="vertical"
           onFinish={handleCreate}
           initialValues={{ asset_type: '3D' }}
+          onValuesChange={(changedValues) => {
+            if (changedValues.project) setSelectedProject(changedValues.project);
+          }}
         >
           <Form.Item
             name="name"
             label="Asset Name"
             rules={[{ required: true, message: 'Please enter asset name' }]}
           >
-            <Input placeholder="e.g. Hero Character Mesh" />
+            <Input 
+              placeholder="e.g. Hero Character Mesh" 
+              onChange={handleNameChange}
+            />
           </Form.Item>
+
+          {(reuseSuggestions?.potential_reuse?.length ?? 0) > 0 && (
+            <div className="mb-4">
+              <Text type="warning" strong className="block mb-2 text-xs">
+                <WarningOutlined /> Potential existing assets found:
+              </Text>
+              <div className="bg-orange-50 dark:bg-orange-950/30 p-2 rounded border border-orange-100 dark:border-orange-900">
+                {reuseSuggestions?.potential_reuse?.map((suggestion: AssetReuseSuggestion, idx: number) => (
+                  <div key={idx} className="text-xs py-1 border-b last:border-0 border-orange-200 dark:border-orange-800">
+                    <Text strong>[{suggestion.type}]</Text> {suggestion.title}
+                    {suggestion.tags && <span className="text-gray-500 ml-2">({suggestion.tags})</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <Row gutter={16}>
              <Col span={12}>

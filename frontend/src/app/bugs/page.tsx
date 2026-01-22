@@ -27,6 +27,7 @@ import {
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useGetBugsQuery, useCreateBugMutation, useUpdateBugMutation } from '@/store/api/bugApi';
 import { useGetProjectsQuery } from '@/store/api/projectApi';
+import { Bug } from '@/types/models';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -47,7 +48,7 @@ export default function BugsPage() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
 
-  const handleStatusChange = async (bugId: number, newStatus: string) => {
+  const handleStatusChange = async (bugId: number, newStatus: Bug['status']) => {
     try {
       await updateBug({ id: bugId, data: { status: newStatus } }).unwrap();
       message.success('Bug status updated');
@@ -56,7 +57,7 @@ export default function BugsPage() {
     }
   };
 
-  const handleCreate = async (values: Record<string, any>) => {
+  const handleCreate = async (values: Partial<Bug>) => {
     try {
       await createBug(values).unwrap();
       message.success('Bug reported successfully');
@@ -105,14 +106,14 @@ export default function BugsPage() {
                   <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: column.color }} />
                   <Text strong>{column.title}</Text>
                   <Tag className="rounded-full px-2 border-none bg-gray-200 dark:bg-gray-700">
-                    {bugs?.filter((b: Record<string, any>) => b.status === column.id).length || 0}
+                    {bugs?.filter((b: Bug) => b.status === column.id).length || 0}
                   </Tag>
                 </Space>
                 <Button type="text" size="small" icon={<MoreOutlined />} />
               </div>
 
               <div className="flex-1 space-y-3">
-                {bugs?.filter((b: Record<string, any>) => b.status === column.id).map((bug: Record<string, any>) => (
+                {bugs?.filter((b: Bug) => b.status === column.id).map((bug: Bug & { reporter_name?: string; assignee_name?: string; project_name?: string }) => (
                   <Card
                     key={bug.id}
                     size="small"
@@ -148,7 +149,7 @@ export default function BugsPage() {
                           items: BUG_COLUMNS.filter(c => c.id !== column.id).map(c => ({
                             key: c.id,
                             label: `Move to ${c.title}`,
-                            onClick: () => handleStatusChange(bug.id, c.id)
+                            onClick: () => handleStatusChange(bug.id, c.id as Bug['status'])
                           }))
                         }}
                       >
