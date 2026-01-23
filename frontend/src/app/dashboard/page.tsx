@@ -87,7 +87,7 @@ export default function Dashboard() {
 
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
-          <Card bordered={false} className="shadow-sm">
+          <Card variant="borderless" className="shadow-sm">
             <Statistic
               title="Active Projects"
               value={12}
@@ -99,7 +99,7 @@ export default function Dashboard() {
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card bordered={false} className="shadow-sm">
+          <Card variant="borderless" className="shadow-sm">
             <Statistic
               title="Tasks Completed"
               value={154}
@@ -111,7 +111,7 @@ export default function Dashboard() {
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card bordered={false} className="shadow-sm">
+          <Card variant="borderless" className="shadow-sm">
             <Statistic
               title="Pending Approval"
               value={24}
@@ -123,7 +123,7 @@ export default function Dashboard() {
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card bordered={false} className="shadow-sm">
+          <Card variant="borderless" className="shadow-sm">
             <Statistic
               title="Bugs Reported"
               value={8}
@@ -138,7 +138,7 @@ export default function Dashboard() {
 
       <Row gutter={[16, 16]} className="mt-6">
         <Col xs={24} lg={16}>
-          <Card title="Sprint Velocity & Trends" bordered={false} className="shadow-sm">
+          <Card title="Sprint Velocity & Trends" variant="borderless" className="shadow-sm">
             <div style={{ width: '100%', height: 350 }}>
               <ResponsiveContainer>
                 <BarChart data={sprintData}>
@@ -155,7 +155,7 @@ export default function Dashboard() {
           </Card>
         </Col>
         <Col xs={24} lg={8}>
-          <Card title="Recent Projects" bordered={false} className="shadow-sm">
+          <Card title="Recent Projects" variant="borderless" className="shadow-sm">
             <Table
               columns={projectColumns}
               dataSource={projectData}
@@ -169,7 +169,7 @@ export default function Dashboard() {
 
       <Row gutter={[16, 16]} className="mt-6">
         <Col span={24}>
-           <Card title="Revenue vs Development Cost" bordered={false} className="shadow-sm">
+           <Card title="Revenue vs Development Cost" variant="borderless" className="shadow-sm">
             <div style={{ width: '100%', height: 300 }}>
               <ResponsiveContainer>
                 <AreaChart data={revenueData}>

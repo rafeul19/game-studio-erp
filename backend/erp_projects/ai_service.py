@@ -49,19 +49,43 @@ class AIEstimationService:
     @staticmethod
     def detect_asset_reuse(project, task_title):
         """
-        Detects potential asset/code reuse from existing tasks in the project.
+        Detects potential asset/code reuse from existing tasks and Assets in the project.
         """
-        existing_tasks = Task.objects.filter(project=project)
-        keywords = set(task_title.lower().split())
+        from assets.models import Asset
         
-        matches = []
+        keywords = set(task_title.lower().replace(',', ' ').split())
+        if len(keywords) < 2:
+            return []
+
+        # Check existing Assets
+        asset_matches = Asset.objects.filter(project=project)
+        reuse_suggestions = []
+        
+        for asset in asset_matches:
+            asset_text = (asset.name + " " + asset.tags).lower()
+            asset_keywords = set(asset_text.replace(',', ' ').split())
+            common = keywords.intersection(asset_keywords)
+            if len(common) >= 1: # Even 1 strong tag match is good for assets
+                reuse_suggestions.append({
+                    "type": "ASSET",
+                    "title": asset.name,
+                    "id": asset.id,
+                    "tags": asset.tags
+                })
+
+        # Check existing Tasks (previous logic)
+        existing_tasks = Task.objects.filter(project=project)
         for task in existing_tasks:
             task_keywords = set(task.title.lower().split())
             common = keywords.intersection(task_keywords)
-            if len(common) >= 2: # At least 2 common keywords
-                matches.append(task.title)
+            if len(common) >= 2:
+                reuse_suggestions.append({
+                    "type": "TASK",
+                    "title": task.title,
+                    "id": task.id
+                })
         
-        return matches[:3]
+        return reuse_suggestions[:5]
 
     @staticmethod
     def calculate_sprint_capacity(project):

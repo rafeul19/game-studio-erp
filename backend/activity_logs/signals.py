@@ -4,6 +4,8 @@ from django.contrib.contenttypes.models import ContentType
 from .models import ActivityLog
 from .middleware import get_current_user
 from erp_projects.models import Project, Sprint, Task
+from assets.models import Asset, AssetVersion
+from bugs.models import Bug
 
 def log_action(instance, action, description, changes=None):
     user = get_current_user()
@@ -20,6 +22,9 @@ def log_action(instance, action, description, changes=None):
 @receiver(post_save, sender=Project)
 @receiver(post_save, sender=Sprint)
 @receiver(post_save, sender=Task)
+@receiver(post_save, sender=Asset)
+@receiver(post_save, sender=AssetVersion)
+@receiver(post_save, sender=Bug)
 def handle_post_save(sender, instance, created, **kwargs):
     action = ActivityLog.CREATED if created else ActivityLog.UPDATED
     desc_prefix = "Created" if created else "Updated"
@@ -32,6 +37,8 @@ def handle_post_save(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=Project)
 @receiver(post_delete, sender=Sprint)
 @receiver(post_delete, sender=Task)
+@receiver(post_delete, sender=Asset)
+@receiver(post_delete, sender=Bug)
 def handle_post_delete(sender, instance, **kwargs):
     description = f"Deleted {sender.__name__}: {instance}"
     log_action(instance, ActivityLog.DELETED, description)

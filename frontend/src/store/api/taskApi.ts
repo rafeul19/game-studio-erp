@@ -22,11 +22,13 @@ export const taskApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Task"],
     }),
-    getTaskSuggestions: builder.query({
-      query: (params) => ({
-        url: "tasks/suggest-points/",
-        params,
+    logWork: builder.mutation({
+      query: (data) => ({
+        url: "tasks/log-work/",
+        method: "POST",
+        body: data,
       }),
+      invalidatesTags: ["Task"],
     }),
   }),
 });
@@ -35,5 +37,5 @@ export const {
   useGetTasksQuery,
   useCreateTaskMutation,
   useUpdateTaskStatusMutation,
-  useLazyGetTaskSuggestionsQuery,
+  useLogWorkMutation,
 } = taskApi;

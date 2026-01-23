@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Form, Input, Button, Card, Typography, Checkbox, message, Row, Col } from 'antd';
+import { Form, Input, Button, Card, Typography, Checkbox, App } from 'antd';
 import { UserOutlined, LockOutlined, DeploymentUnitOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import { useLoginMutation } from '@/store/api/authApi';
@@ -14,8 +14,9 @@ export default function LoginPage() {
   const [login, { isLoading }] = useLoginMutation();
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const { message } = App.useApp();
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: Record<string, any>) => {
     try {
       const result = await login({
         username: values.username,
@@ -30,8 +31,8 @@ export default function LoginPage() {
       
       message.success('Welcome back!');
       router.push('/dashboard');
-    } catch (err: any) {
-      const errorMsg = err.data?.detail || 'Invalid username or password';
+    } catch (error: any) {
+      const errorMsg = error.data?.detail || 'Invalid username or password';
       message.error(errorMsg);
     }
   };
@@ -47,7 +48,7 @@ export default function LoginPage() {
           <Text style={{ color: '#94a3b8' }}>Enterprise-grade studio management</Text>
         </div>
 
-        <Card bordered={false} className="shadow-2xl rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
+        <Card variant="borderless" className="shadow-2xl rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
           <Form
             name="login"
             layout="vertical"

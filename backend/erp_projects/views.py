@@ -51,7 +51,11 @@ def project_sprints(request, project_id):
 def create_task(request):
     serializer = TaskSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
+        # Default assigned_to to the creator if not provided
+        if not serializer.validated_data.get('assigned_to'):
+            serializer.save(assigned_to=request.user)
+        else:
+            serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

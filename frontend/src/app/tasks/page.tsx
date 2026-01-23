@@ -15,19 +15,19 @@ import {
   Form,
   Input,
   Select,
-  message,
   Dropdown,
+  App,
 } from 'antd';
 import {
   PlusOutlined,
   MoreOutlined,
   UserOutlined,
-  ClockCircleOutlined,
   FireOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useGetTasksQuery, useUpdateTaskStatusMutation, useCreateTaskMutation } from '@/store/api/taskApi';
-import { useGetProjectsQuery } from '@/store/api/projectApi';
+import { useGetTasksQuery, useUpdateTaskStatusMutation, useCreateTaskMutation, useLogWorkMutation } from '@/store/api/taskApi';
+import { useGetProjectsQuery, useSuggestStoryPointsMutation } from '@/store/api/projectApi';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -39,31 +39,78 @@ const COLUMNS = [
   { id: 'DONE', title: 'Done', color: '#52c41a' },
 ];
 
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  priority: string;
+  status: string;
+  story_points: number;
+  assignee_name?: string;
+  assignee_avatar?: string;
+  project_name?: string;
+}
+
 export default function TasksPage() {
-  const { data: tasks, isLoading } = useGetTasksQuery({});
+  const { data: tasks } = useGetTasksQuery({});
   const { data: projects } = useGetProjectsQuery({});
   const [updateStatus] = useUpdateTaskStatusMutation();
   const [createTask, { isLoading: isCreating }] = useCreateTaskMutation();
+  const [logWork, { isLoading: isLogging }] = useLogWorkMutation();
   
+  const { message } = App.useApp();
+
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isLogWorkVisible, setIsLogWorkVisible] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [form] = Form.useForm();
+  const [workLogForm] = Form.useForm();
+  
+  const [suggestPoints, { isLoading: isSuggesting }] = useSuggestStoryPointsMutation();
+
+  const handleAISuggest = async () => {
+    const title = form.getFieldValue('title');
+    const description = form.getFieldValue('description');
+    if (!title) {
+      message.warning('Please enter a title first');
+      return;
+    }
+    try {
+      const result = await suggestPoints({ title, description: description || '' }).unwrap();
+      form.setFieldsValue({ story_points: result.suggested_points });
+      message.success(`AI suggested ${result.suggested_points} points`);
+    } catch {
+      message.error('AI suggestion failed');
+    }
+  };
+
+  const handleLogWork = async (values: { hours: number; description: string; is_billable: boolean }) => {
+    try {
+      await logWork({ ...values, task: selectedTask?.id }).unwrap();
+      message.success('Work logged successfully');
+      setIsLogWorkVisible(false);
+      workLogForm.resetFields();
+    } catch {
+      message.error('Failed to log work');
+    }
+  };
 
   const handleStatusChange = async (taskId: number, newStatus: string) => {
     try {
       await updateStatus({ id: taskId, status: newStatus }).unwrap();
       message.success('Task updated');
-    } catch (err) {
+    } catch {
       message.error('Failed to update task');
     }
   };
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: Partial<Task>) => {
     try {
       await createTask(values).unwrap();
       message.success('Task created successfully');
       setIsModalVisible(false);
       form.resetFields();
-    } catch (err) {
+    } catch {
       message.error('Failed to create task');
     }
   };
@@ -105,19 +152,19 @@ export default function TasksPage() {
                   <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: column.color }} />
                   <Text strong>{column.title}</Text>
                   <Tag className="rounded-full px-2 border-none bg-gray-200 dark:bg-gray-700">
-                    {tasks?.filter((t: any) => t.status === column.id).length || 0}
+                    {tasks?.filter((t: { status: string }) => t.status === column.id).length || 0}
                   </Tag>
                 </Space>
                 <Button type="text" size="small" icon={<MoreOutlined />} />
               </div>
 
               <div className="flex-1 space-y-3">
-                {tasks?.filter((t: any) => t.status === column.id).map((task: any) => (
+                {tasks?.filter((t: { status: string }) => t.status === column.id).map((task: Task) => (
                   <Card
                     key={task.id}
                     size="small"
                     className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                    bordered={false}
+                    variant="borderless"
                   >
                     <div className="mb-2">
                        <Tag color={getPriorityColor(task.priority)} className="text-[10px] uppercase font-bold px-1.5 leading-tight">
@@ -129,6 +176,18 @@ export default function TasksPage() {
                       <Space>
                         <Tooltip title={task.assignee_name}>
                           <Avatar size="small" icon={<UserOutlined />} src={task.assignee_avatar} />
+                        </Tooltip>
+                        <Tooltip title="Log Work">
+                          <Button 
+                            type="text" 
+                            size="small" 
+                            icon={<ClockCircleOutlined />} 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedTask(task);
+                              setIsLogWorkVisible(true);
+                            }}
+                          />
                         </Tooltip>
                         {task.story_points && (
                           <Tag icon={<FireOutlined />} className="m-0 border-none bg-orange-50 text-orange-600">
@@ -161,7 +220,7 @@ export default function TasksPage() {
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={form}
@@ -181,7 +240,7 @@ export default function TasksPage() {
              <Col span={12}>
                 <Form.Item name="project" label="Project" rules={[{ required: true }]}>
                   <Select placeholder="Select project">
-                    {projects?.map((p: any) => (
+                    {projects?.map((p: { id: number; name: string }) => (
                       <Option key={p.id} value={p.id}>{p.name}</Option>
                     ))}
                   </Select>
@@ -199,6 +258,26 @@ export default function TasksPage() {
              </Col>
           </Row>
 
+          <Form.Item label="Story Points" className="mb-4">
+             <Row gutter={8}>
+                <Col span={16}>
+                   <Form.Item name="story_points" noStyle>
+                      <Input type="number" placeholder="Enter effort points..." min={1} />
+                   </Form.Item>
+                </Col>
+                <Col span={8}>
+                   <Button 
+                      icon={<FireOutlined />} 
+                      onClick={handleAISuggest}
+                      loading={isSuggesting}
+                      className="w-full bg-orange-50 text-orange-600 border-orange-200"
+                   >
+                      Suggest
+                   </Button>
+                </Col>
+             </Row>
+          </Form.Item>
+
           <Form.Item
             name="description"
             label="Description"
@@ -211,6 +290,52 @@ export default function TasksPage() {
               <Button onClick={() => setIsModalVisible(false)}>Cancel</Button>
               <Button type="primary" htmlType="submit" loading={isCreating}>
                 Create Task
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title={
+          <Space>
+            <ClockCircleOutlined className="text-blue-500" />
+            <span>Log Work: {selectedTask?.title}</span>
+          </Space>
+        }
+        open={isLogWorkVisible}
+        onCancel={() => setIsLogWorkVisible(false)}
+        footer={null}
+        destroyOnHidden
+      >
+        <Form
+          form={workLogForm}
+          layout="vertical"
+          onFinish={handleLogWork}
+          initialValues={{ hours: 1, is_billable: true }}
+        >
+          <Row gutter={16}>
+             <Col span={12}>
+                <Form.Item name="hours" label="Hours" rules={[{ required: true }]}>
+                  <Input type="number" step="0.5" min={0.5} />
+                </Form.Item>
+             </Col>
+             <Col span={12} className="flex items-center">
+                <Form.Item name="is_billable" label=" " valuePropName="checked">
+                   <Select options={[{label: 'Billable', value: true}, {label: 'Internal', value: false}]} />
+                </Form.Item>
+             </Col>
+          </Row>
+
+          <Form.Item name="description" label="What did you work on?">
+            <Input.TextArea rows={3} placeholder="Briefly describe your progress..." />
+          </Form.Item>
+
+          <Form.Item className="mb-0 text-right">
+            <Space>
+              <Button onClick={() => setIsLogWorkVisible(false)}>Cancel</Button>
+              <Button type="primary" htmlType="submit" loading={isLogging}>
+                Log Hours
               </Button>
             </Space>
           </Form.Item>
