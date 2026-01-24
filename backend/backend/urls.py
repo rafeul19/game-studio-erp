@@ -78,4 +78,6 @@ urlpatterns = [
     # Core Modules (Phase 2)
     path('api/', include('assets.urls')),
     path('api/', include('bugs.urls')),
+    path('api/hr/', include('hr.urls')),
+    path('api/', include('finance.urls')),
 ]

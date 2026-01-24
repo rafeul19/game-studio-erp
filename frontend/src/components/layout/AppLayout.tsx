@@ -24,6 +24,7 @@ import {
   SettingOutlined,
   FileSearchOutlined,
   BugOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -78,6 +79,11 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
       key: '/bugs',
       icon: <BugOutlined />,
       label: 'Bugs',
+    },
+    {
+      key: '/hr',
+      icon: <TeamOutlined />,
+      label: 'HR Management',
     },
     {
       key: '/settings',

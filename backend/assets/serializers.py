@@ -6,7 +6,7 @@ class AssetVersionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AssetVersion
-        fields = ['id', 'version_number', 'file_path', 'note', 'created_at', 'created_by', 'created_by_name']
+        fields = ['id', 'version_number', 'file', 'file_path', 'file_size', 'file_type', 'thumbnail', 'note', 'created_at', 'created_by', 'created_by_name']
         read_only_fields = ['created_by', 'created_at']
 
 class AssetSerializer(serializers.ModelSerializer):

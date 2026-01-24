@@ -28,11 +28,13 @@ import {
   DownloadOutlined,
   HistoryOutlined,
   WarningOutlined,
+  UploadOutlined,
 } from '@ant-design/icons';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useGetAssetsQuery, useCreateAssetMutation } from '@/store/api/assetApi';
+import { FileUploadComponent } from '@/components/assets/FileUploadComponent';
+import { useGetAssetsQuery, useCreateAssetMutation, useAddAssetVersionMutation } from '@/store/api/assetApi';
 import { useGetProjectsQuery, useDetectAssetReuseMutation, AssetReuseSuggestion } from '@/store/api/projectApi';
-import { Asset } from '@/types/models';
+import { Asset, AssetVersion } from '@/types/models';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -41,8 +43,11 @@ export default function AssetsPage() {
   const { data: projects } = useGetProjectsQuery({});
   const { data: assets, isLoading } = useGetAssetsQuery({});
   const [createAsset, { isLoading: isCreating }] = useCreateAssetMutation();
+  const [addAssetVersion, { isLoading: isUploading }] = useAddAssetVersionMutation();
   
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isUploadModalVisible, setIsUploadModalVisible] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [filterType, setFilterType] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [form] = Form.useForm();
@@ -66,6 +71,34 @@ export default function AssetsPage() {
       form.resetFields();
     } catch {
       message.error('Failed to create asset');
+    }
+  };
+
+  const handleUploadVersion = (asset: Asset) => {
+    setSelectedAsset(asset);
+    setIsUploadModalVisible(true);
+  };
+
+  const handleFileUploadComplete = async (fileData: any) => {
+    if (!selectedAsset) return;
+    
+    try {
+      const versionData = {
+        file: fileData.file,
+        note: `New version uploaded: ${fileData.file?.name || 'Unknown file'}`,
+      };
+      
+      await addAssetVersion({ 
+        assetId: selectedAsset.id, 
+        data: versionData 
+      }).unwrap();
+      
+      message.success('New asset version uploaded successfully!');
+      setIsUploadModalVisible(false);
+      setSelectedAsset(null);
+    } catch (error) {
+      console.error('Upload error:', error);
+      message.error('Failed to upload asset version');
     }
   };
 
@@ -151,10 +184,18 @@ export default function AssetsPage() {
                     {getAssetIcon(asset.asset_type)}
                   </div>
                 }
-                actions={[
-                  <DownloadOutlined key="download" />,
-                  <HistoryOutlined key="history" />,
-                ]}
+actions={[
+                   <Button 
+                     key="upload" 
+                     icon={<UploadOutlined />} 
+                     onClick={() => handleUploadVersion(asset)}
+                     size="small"
+                   >
+                     Upload
+                   </Button>,
+                   <DownloadOutlined key="download" />,
+                   <HistoryOutlined key="history" />,
+                 ]}
               >
                 <Card.Meta
                   title={
@@ -266,6 +307,56 @@ export default function AssetsPage() {
             </Space>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* File Upload Modal */}
+      <Modal
+        title={`Upload New Version - ${selectedAsset?.name}`}
+        open={isUploadModalVisible}
+        onCancel={() => {
+          setIsUploadModalVisible(false);
+          setSelectedAsset(null);
+        }}
+        footer={null}
+        width={600}
+        destroyOnClose
+      >
+        <div className="space-y-4">
+          <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center space-x-2">
+              <UploadOutlined className="text-blue-600" />
+              <div>
+                <Text strong className="text-blue-900 dark:text-blue-100">
+                  Asset Version Upload
+                </Text>
+                <br />
+                <Text type="secondary" className="text-sm">
+                  Uploading a new version for: {selectedAsset?.name}
+                </Text>
+              </div>
+            </div>
+          </div>
+
+          <FileUploadComponent
+            onUploadComplete={handleFileUploadComplete}
+            maxFileSize={100}
+            disabled={isUploading}
+          />
+
+          <div className="text-right pt-4 border-t">
+            <Space>
+              <Button 
+                onClick={() => {
+                  setIsUploadModalVisible(false);
+                  setSelectedAsset(null);
+                }}
+                disabled={isUploading}
+              >
+                Cancel
+              </Button>
+            </Space>
+          </div>
+        </div>
       </Modal>
     </AppLayout>
   );

@@ -42,7 +42,11 @@ class AssetVersion(models.Model):
         related_name='versions'
     )
     version_number = models.PositiveIntegerField()
-    file_path = models.CharField(max_length=500, help_text="Storage path or URL to the asset file")
+    file = models.FileField(upload_to='assets/%Y/%m/%d/', null=True, blank=True)
+    file_path = models.CharField(max_length=500, blank=True, help_text="S3 Key or external URL")
+    file_size = models.BigIntegerField(null=True, blank=True)
+    file_type = models.CharField(max_length=50, blank=True)
+    thumbnail = models.ImageField(upload_to='thumbnails/%Y/%m/%d/', null=True, blank=True)
     note = models.TextField(blank=True, help_text="Release notes for this version")
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(
