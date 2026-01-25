@@ -42,6 +42,11 @@ const BUG_COLUMNS = [
 export default function BugsPage() {
   const { data: bugs } = useGetBugsQuery({});
   const { data: projects } = useGetProjectsQuery({});
+  
+  // Handle both paginated response (with results) and direct array
+  const bugsList = Array.isArray(bugs) 
+    ? bugs 
+    : (bugs as any)?.results || [];
   const [createBug, { isLoading: isCreating }] = useCreateBugMutation();
   const [updateBug] = useUpdateBugMutation();
   
@@ -107,14 +112,14 @@ export default function BugsPage() {
                   <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: column.color }} />
                   <Text strong>{column.title}</Text>
                   <Tag className="rounded-full px-2 border-none bg-gray-200 dark:bg-gray-700">
-                    {bugs?.filter((b: Bug) => b.status === column.id).length || 0}
+                    {bugsList.filter((b: Bug) => b.status === column.id).length || 0}
                   </Tag>
                 </Space>
                 <Button type="text" size="small" icon={<MoreOutlined />} />
               </div>
 
               <div className="flex-1 space-y-3">
-                {bugs?.filter((b: Bug) => b.status === column.id).map((bug: Bug & { reporter_name?: string; assignee_name?: string; project_name?: string }) => (
+                {bugsList.filter((b: Bug) => b.status === column.id).map((bug: Bug & { reporter_name?: string; assignee_name?: string; project_name?: string }) => (
                   <Card
                     key={bug.id}
                     size="small"

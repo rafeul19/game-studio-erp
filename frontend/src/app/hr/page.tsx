@@ -52,13 +52,20 @@ import {
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
-const { TabPane } = Tabs;
 const { Option } = Select;
 
 export default function HRManagementPage() {
   const { data: employees, isLoading: employeesLoading } = useGetEmployeesQuery({});
   const { data: departments, isLoading: departmentsLoading } = useGetDepartmentsQuery({});
   const { data: analytics, isLoading: analyticsLoading } = useGetHRAnalyticsQuery({});
+  
+  // Handle both paginated response (with results) and direct array
+  const employeesList = Array.isArray(employees) 
+    ? employees 
+    : (employees as any)?.results || [];
+  const departmentsList = Array.isArray(departments) 
+    ? departments 
+    : (departments as any)?.results || [];
 
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isEmployeeModalVisible, setIsEmployeeModalVisible] = useState(false);
@@ -213,7 +220,7 @@ export default function HRManagementPage() {
             title="Total Employees"
             value={analytics?.overview.total_employees || 0}
             prefix={<TeamOutlined />}
-            valueStyle={{ color: '#1890ff' }}
+            styles={{ content: { color: '#1890ff' } }}
           />
         </Card>
       </Col>
@@ -223,7 +230,7 @@ export default function HRManagementPage() {
             title="Departments"
             value={analytics?.overview.total_departments || 0}
             prefix={<EnvironmentOutlined />}
-            valueStyle={{ color: '#52c41a' }}
+            styles={{ content: { color: '#52c41a' } }}
           />
         </Card>
       </Col>
@@ -233,7 +240,7 @@ export default function HRManagementPage() {
             title="Active Employees"
             value={analytics?.overview.active_employees || 0}
             prefix={<CheckCircleOutlined />}
-            valueStyle={{ color: '#52c41a' }}
+            styles={{ content: { color: '#52c41a' } }}
           />
         </Card>
       </Col>
@@ -334,45 +341,61 @@ export default function HRManagementPage() {
         </Button>
       </div>
 
-      <Tabs defaultActiveKey="overview" className="mb-6">
-        <TabPane tab="Overview" key="overview">
-          {renderOverview()}
-          {renderDepartmentDistribution()}
-          {renderRecentActivities()}
-        </TabPane>
-        
-        <TabPane tab="Employees" key="employees">
-          <Card>
-            <Table
-              columns={employeeColumns}
-              dataSource={employees}
-              rowKey="id"
-              loading={employeesLoading}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-              }}
-            />
-          </Card>
-        </TabPane>
-        
-        <TabPane tab="Departments" key="departments">
-          <Card>
-            <Table
-              columns={departmentColumns}
-              dataSource={departments}
-              rowKey="id"
-              loading={departmentsLoading}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-              }}
-            />
-          </Card>
-        </TabPane>
-      </Tabs>
+      <Tabs 
+        defaultActiveKey="overview" 
+        className="mb-6"
+        items={[
+          {
+            key: 'overview',
+            label: 'Overview',
+            children: (
+              <>
+                {renderOverview()}
+                {renderDepartmentDistribution()}
+                {renderRecentActivities()}
+              </>
+            ),
+          },
+          {
+            key: 'employees',
+            label: 'Employees',
+            children: (
+              <Card>
+                <Table
+                  columns={employeeColumns}
+                  dataSource={employeesList}
+                  rowKey="id"
+                  loading={employeesLoading}
+                  pagination={{
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showQuickJumper: true,
+                  }}
+                />
+              </Card>
+            ),
+          },
+          {
+            key: 'departments',
+            label: 'Departments',
+            children: (
+              <Card>
+                <Table
+                  columns={departmentColumns}
+                  dataSource={departmentsList}
+                  rowKey="id"
+                  loading={departmentsLoading}
+                  pagination={{
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showQuickJumper: true,
+                  }}
+                />
+              </Card>
+            ),
+          },
+        ]}
+      />
 
       {/* Employee Modal */}
       <Modal
@@ -407,7 +430,7 @@ export default function HRManagementPage() {
                 rules={[{ required: true, message: 'Please select department' }]}
               >
                 <Select placeholder="Select department">
-                  {departments?.map((dept) => (
+                  {departmentsList.map((dept) => (
                     <Option key={dept.id} value={dept.name}>{dept.name}</Option>
                   ))}
                 </Select>

@@ -108,7 +108,7 @@ export const FileUploadComponent: React.FC<FileUploadComponentProps> = ({
       }, 200);
 
       // Get auth token
-      const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem('access');
       
       // Upload file (this would be your actual API call)
       const response = await fetch('/api/assets/upload/', {

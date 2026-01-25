@@ -111,9 +111,14 @@ export default function AssetsPage() {
     }
   };
 
-  const filteredAssets = assets?.filter((asset: Asset) => {
-    const matchesPath = asset.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                      asset.tags.toLowerCase().includes(searchQuery.toLowerCase());
+  // Handle both paginated response (with results) and direct array
+  const assetsList = Array.isArray(assets) 
+    ? assets 
+    : (assets as any)?.results || [];
+
+  const filteredAssets = assetsList.filter((asset: Asset) => {
+    const matchesPath = asset.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                      asset.tags?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = filterType ? asset.asset_type === filterType : true;
     return matchesPath && matchesType;
   });
@@ -319,7 +324,7 @@ actions={[
         }}
         footer={null}
         width={600}
-        destroyOnClose
+        destroyOnHidden
       >
         <div className="space-y-4">
           <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800">

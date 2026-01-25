@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Layout,
   Menu,
@@ -36,10 +36,16 @@ const { Text } = Typography;
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+
+  // Fix hydration mismatch by only rendering user data on client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -150,7 +156,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
               <Space style={{ cursor: 'pointer' }}>
                 <Avatar icon={<UserOutlined />} src={user?.avatar} />
-                <Text strong>{user?.username || 'User'}</Text>
+                <Text strong>{mounted ? (user?.username || 'User') : 'User'}</Text>
               </Space>
             </Dropdown>
           </Space>
@@ -171,3 +177,5 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     </Layout>
   );
 };
+
+export default AppLayout;

@@ -39,7 +39,6 @@ import { apiClient } from '@/lib/utils/api';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
-const { TabPane } = Tabs;
 
 interface FinancialSummary {
   total_revenue: number;
@@ -303,10 +302,15 @@ const FinancePage: React.FC = () => {
           </Space>
         </div>
 
-        <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab="Dashboard" key="dashboard">
-            {summary && (
-              <>
+        <Tabs 
+          activeKey={activeTab} 
+          onChange={setActiveTab}
+          items={[
+            {
+              key: 'dashboard',
+              label: 'Dashboard',
+              children: summary ? (
+                <>
                 <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
                   <Col xs={24} sm={12} md={6}>
                     <Card>
@@ -314,7 +318,7 @@ const FinancePage: React.FC = () => {
                         title="Total Revenue"
                         value={summary.total_revenue}
                         precision={2}
-                        valueStyle={{ color: '#3f8600' }}
+                        styles={{ content: { color: '#3f8600' } }}
                         prefix={<ArrowUpOutlined />}
                         suffix="$"
                       />
@@ -326,7 +330,7 @@ const FinancePage: React.FC = () => {
                         title="Total Expenses"
                         value={summary.total_expenses}
                         precision={2}
-                        valueStyle={{ color: '#cf1322' }}
+                        styles={{ content: { color: '#cf1322' } }}
                         prefix={<ArrowDownOutlined />}
                         suffix="$"
                       />
@@ -338,7 +342,7 @@ const FinancePage: React.FC = () => {
                         title="Net Profit"
                         value={summary.net_profit}
                         precision={2}
-                        valueStyle={{ color: summary.net_profit >= 0 ? '#3f8600' : '#cf1322' }}
+                        styles={{ content: { color: summary.net_profit >= 0 ? '#3f8600' : '#cf1322' } }}
                         prefix={<WalletOutlined />}
                         suffix="$"
                       />
@@ -351,7 +355,7 @@ const FinancePage: React.FC = () => {
                         value={summary.profit_margin}
                         precision={2}
                         suffix="%"
-                        valueStyle={{ color: summary.profit_margin >= 0 ? '#3f8600' : '#cf1322' }}
+                        styles={{ content: { color: summary.profit_margin >= 0 ? '#3f8600' : '#cf1322' } }}
                       />
                     </Card>
                   </Col>
@@ -406,21 +410,21 @@ const FinancePage: React.FC = () => {
                           <Statistic
                             title="Total Invoices"
                             value={summary.total_invoices}
-                            valueStyle={{ color: '#1890ff' }}
+                            styles={{ content: { color: '#1890ff' } }}
                           />
                         </Col>
                         <Col span={8}>
                           <Statistic
                             title="Unpaid"
                             value={summary.unpaid_invoices}
-                            valueStyle={{ color: '#faad14' }}
+                            styles={{ content: { color: '#faad14' } }}
                           />
                         </Col>
                         <Col span={8}>
                           <Statistic
                             title="Overdue"
                             value={summary.overdue_invoices}
-                            valueStyle={{ color: '#ff4d4f' }}
+                            styles={{ content: { color: '#ff4d4f' } }}
                           />
                         </Col>
                       </Row>
@@ -432,7 +436,7 @@ const FinancePage: React.FC = () => {
                         title="Total Outstanding"
                         value={summary.total_outstanding}
                         precision={2}
-                        valueStyle={{ color: '#faad14' }}
+                        styles={{ content: { color: '#faad14' } }}
                         prefix={<DollarOutlined />}
                         suffix="$"
                       />
@@ -440,10 +444,12 @@ const FinancePage: React.FC = () => {
                   </Col>
                 </Row>
               </>
-            )}
-          </TabPane>
-
-          <TabPane tab="Invoices" key="invoices">
+              ),
+            },
+            {
+              key: 'invoices',
+              label: 'Invoices',
+              children: (
             <Card title="Invoice Management" loading={loading}>
               <Table
                 columns={invoiceColumns}
@@ -456,9 +462,12 @@ const FinancePage: React.FC = () => {
                 }}
               />
             </Card>
-          </TabPane>
-
-          <TabPane tab="Expenses" key="expenses">
+              ),
+            },
+            {
+              key: 'expenses',
+              label: 'Expenses',
+              children: (
             <Card title="Expense Management" loading={loading}>
               <Table
                 columns={expenseColumns}
@@ -471,23 +480,28 @@ const FinancePage: React.FC = () => {
                 }}
               />
             </Card>
-          </TabPane>
-
-          <TabPane tab="Budgets" key="budgets">
-            <Card title="Budget Tracking" loading={loading}>
-              <Table
-                columns={budgetColumns}
-                dataSource={budgets}
-                rowKey="id"
-                pagination={{
-                  showSizeChanger: true,
-                  showQuickJumper: true,
-                  showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} budgets`,
-                }}
-              />
-            </Card>
-          </TabPane>
-        </Tabs>
+              ),
+            },
+            {
+              key: 'budgets',
+              label: 'Budgets',
+              children: (
+                <Card title="Budget Tracking" loading={loading}>
+                  <Table
+                    columns={budgetColumns}
+                    dataSource={budgets}
+                    rowKey="id"
+                    pagination={{
+                      showSizeChanger: true,
+                      showQuickJumper: true,
+                      showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} budgets`,
+                    }}
+                  />
+                </Card>
+              ),
+            },
+          ]}
+        />
       </div>
     </AppLayout>
   );

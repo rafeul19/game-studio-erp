@@ -83,9 +83,9 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem('accessToken');
+        const token = localStorage.getItem('access');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/stats/`, { headers });
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/dashboard/stats/`, { headers });
         setStats(response.data);
       } catch (err: any) {
         if (err.response && err.response.status === 401) {
@@ -100,13 +100,14 @@ export default function Dashboard() {
     };
 
     fetchStats();
-  }, []);
+  }, [router]);
 
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex justify-center items-center h-screen">
-          <Spin size="large" tip="Loading Dashboard..." />
+        <div className="flex flex-col justify-center items-center h-screen">
+          <Spin size="large" />
+          <div className="mt-4 text-gray-600">Loading Dashboard...</div>
         </div>
       </AppLayout>
     );
