@@ -169,7 +169,7 @@ const ProfilePage: React.FC = () => {
   }
 
   return (
-    <DashboardLayout>
+    <AppLayout>
       <div style={{ padding: '24px' }}>
         <Row gutter={[24, 24]}>
           <Col xs={24} lg={8}>
@@ -514,7 +514,7 @@ const ProfilePage: React.FC = () => {
           </Form>
         </Modal>
       </div>
-    </DashboardLayout>
+    </AppLayout>
   );
 };
 

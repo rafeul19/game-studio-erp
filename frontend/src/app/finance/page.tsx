@@ -108,13 +108,13 @@ const FinancePage: React.FC = () => {
   const fetchFinancialData = async () => {
     setLoading(true);
     try {
-      const params = {};
+      const params: any = {};
       if (dateRange) {
         params.start_date = dateRange[0].format('YYYY-MM-DD');
         params.end_date = dateRange[1].format('YYYY-MM-DD');
       }
 
-      const [summaryRes, invoicesRes, expensesRes, budgetsRes, analyticsRes] = await Promise.all([
+      const [summaryRes, invoicesRes, expensesRes, budgetsRes] = await Promise.all([
         apiClient.get('/api/finance/analytics/', { params }),
         apiClient.get('/api/finance/invoices/'),
         apiClient.get('/api/finance/expenses/'),
@@ -126,8 +126,8 @@ const FinancePage: React.FC = () => {
       setExpenses(expensesRes.data.results || expensesRes.data);
       setBudgets(budgetsRes.data.results || budgetsRes.data);
       
-      if (analyticsRes.data.monthly_trends) {
-        setMonthlyTrends(analyticsRes.data.monthly_trends);
+      if (summaryRes.data.monthly_trends) {
+        setMonthlyTrends(summaryRes.data.monthly_trends);
       }
     } catch (error) {
       message.error('Failed to fetch financial data');
@@ -311,175 +311,175 @@ const FinancePage: React.FC = () => {
               label: 'Dashboard',
               children: summary ? (
                 <>
-                <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-                  <Col xs={24} sm={12} md={6}>
-                    <Card>
-                      <Statistic
-                        title="Total Revenue"
-                        value={summary.total_revenue}
-                        precision={2}
-                        styles={{ content: { color: '#3f8600' } }}
-                        prefix={<ArrowUpOutlined />}
-                        suffix="$"
-                      />
-                    </Card>
-                  </Col>
-                  <Col xs={24} sm={12} md={6}>
-                    <Card>
-                      <Statistic
-                        title="Total Expenses"
-                        value={summary.total_expenses}
-                        precision={2}
-                        styles={{ content: { color: '#cf1322' } }}
-                        prefix={<ArrowDownOutlined />}
-                        suffix="$"
-                      />
-                    </Card>
-                  </Col>
-                  <Col xs={24} sm={12} md={6}>
-                    <Card>
-                      <Statistic
-                        title="Net Profit"
-                        value={summary.net_profit}
-                        precision={2}
-                        styles={{ content: { color: summary.net_profit >= 0 ? '#3f8600' : '#cf1322' } }}
-                        prefix={<WalletOutlined />}
-                        suffix="$"
-                      />
-                    </Card>
-                  </Col>
-                  <Col xs={24} sm={12} md={6}>
-                    <Card>
-                      <Statistic
-                        title="Profit Margin"
-                        value={summary.profit_margin}
-                        precision={2}
-                        suffix="%"
-                        styles={{ content: { color: summary.profit_margin >= 0 ? '#3f8600' : '#cf1322' } }}
-                      />
-                    </Card>
-                  </Col>
-                </Row>
+                  <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+                    <Col xs={24} sm={12} md={6}>
+                      <Card>
+                        <Statistic
+                          title="Total Revenue"
+                          value={summary.total_revenue}
+                          precision={2}
+                          styles={{ content: { color: '#3f8600' } }}
+                          prefix={<ArrowUpOutlined />}
+                          suffix="$"
+                        />
+                      </Card>
+                    </Col>
+                    <Col xs={24} sm={12} md={6}>
+                      <Card>
+                        <Statistic
+                          title="Total Expenses"
+                          value={summary.total_expenses}
+                          precision={2}
+                          styles={{ content: { color: '#cf1322' } }}
+                          prefix={<ArrowDownOutlined />}
+                          suffix="$"
+                        />
+                      </Card>
+                    </Col>
+                    <Col xs={24} sm={12} md={6}>
+                      <Card>
+                        <Statistic
+                          title="Net Profit"
+                          value={summary.net_profit}
+                          precision={2}
+                          styles={{ content: { color: summary.net_profit >= 0 ? '#3f8600' : '#cf1322' } }}
+                          prefix={<WalletOutlined />}
+                          suffix="$"
+                        />
+                      </Card>
+                    </Col>
+                    <Col xs={24} sm={12} md={6}>
+                      <Card>
+                        <Statistic
+                          title="Profit Margin"
+                          value={summary.profit_margin}
+                          precision={2}
+                          suffix="%"
+                          styles={{ content: { color: summary.profit_margin >= 0 ? '#3f8600' : '#cf1322' } }}
+                        />
+                      </Card>
+                    </Col>
+                  </Row>
 
-                <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-                  <Col xs={24} lg={16}>
-                    <Card title="Monthly Trends" loading={loading}>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={monthlyTrends}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="month" />
-                          <YAxis />
-                          <RechartsTooltip />
-                          <Line type="monotone" dataKey="revenue" stroke="#3f8600" strokeWidth={2} />
-                          <Line type="monotone" dataKey="expenses" stroke="#cf1322" strokeWidth={2} />
-                          <Line type="monotone" dataKey="profit" stroke="#1890ff" strokeWidth={2} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </Card>
-                  </Col>
-                  <Col xs={24} lg={8}>
-                    <Card title="Expense Categories" loading={loading}>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                          <Pie
-                            data={pieData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="value"
-                          >
-                            {pieData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <RechartsTooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </Card>
-                  </Col>
-                </Row>
+                  <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+                    <Col xs={24} lg={16}>
+                      <Card title="Monthly Trends" loading={loading}>
+                        <ResponsiveContainer width="100%" height={300}>
+                          <LineChart data={monthlyTrends}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="month" />
+                            <YAxis />
+                            <RechartsTooltip />
+                            <Line type="monotone" dataKey="revenue" stroke="#3f8600" strokeWidth={2} />
+                            <Line type="monotone" dataKey="expenses" stroke="#cf1322" strokeWidth={2} />
+                            <Line type="monotone" dataKey="profit" stroke="#1890ff" strokeWidth={2} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </Card>
+                    </Col>
+                    <Col xs={24} lg={8}>
+                      <Card title="Expense Categories" loading={loading}>
+                        <ResponsiveContainer width="100%" height={300}>
+                          <PieChart>
+                            <Pie
+                              data={pieData}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={({ name, percent }: any) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                              outerRadius={80}
+                              fill="#8884d8"
+                              dataKey="value"
+                            >
+                              {pieData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <RechartsTooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </Card>
+                    </Col>
+                  </Row>
 
-                <Row gutter={[16, 16]}>
-                  <Col xs={24} lg={12}>
-                    <Card title="Invoice Summary" loading={loading}>
-                      <Row gutter={16}>
-                        <Col span={8}>
-                          <Statistic
-                            title="Total Invoices"
-                            value={summary.total_invoices}
-                            styles={{ content: { color: '#1890ff' } }}
-                          />
-                        </Col>
-                        <Col span={8}>
-                          <Statistic
-                            title="Unpaid"
-                            value={summary.unpaid_invoices}
-                            styles={{ content: { color: '#faad14' } }}
-                          />
-                        </Col>
-                        <Col span={8}>
-                          <Statistic
-                            title="Overdue"
-                            value={summary.overdue_invoices}
-                            styles={{ content: { color: '#ff4d4f' } }}
-                          />
-                        </Col>
-                      </Row>
-                    </Card>
-                  </Col>
-                  <Col xs={24} lg={12}>
-                    <Card title="Outstanding Amount" loading={loading}>
-                      <Statistic
-                        title="Total Outstanding"
-                        value={summary.total_outstanding}
-                        precision={2}
-                        styles={{ content: { color: '#faad14' } }}
-                        prefix={<DollarOutlined />}
-                        suffix="$"
-                      />
-                    </Card>
-                  </Col>
-                </Row>
-              </>
-              ),
+                  <Row gutter={[16, 16]}>
+                    <Col xs={24} lg={12}>
+                      <Card title="Invoice Summary" loading={loading}>
+                        <Row gutter={16}>
+                          <Col span={8}>
+                            <Statistic
+                              title="Total Invoices"
+                              value={summary.total_invoices}
+                              styles={{ content: { color: '#1890ff' } }}
+                            />
+                          </Col>
+                          <Col span={8}>
+                            <Statistic
+                              title="Unpaid"
+                              value={summary.unpaid_invoices}
+                              styles={{ content: { color: '#faad14' } }}
+                            />
+                          </Col>
+                          <Col span={8}>
+                            <Statistic
+                              title="Overdue"
+                              value={summary.overdue_invoices}
+                              styles={{ content: { color: '#ff4d4f' } }}
+                            />
+                          </Col>
+                        </Row>
+                      </Card>
+                    </Col>
+                    <Col xs={24} lg={12}>
+                      <Card title="Outstanding Amount" loading={loading}>
+                        <Statistic
+                          title="Total Outstanding"
+                          value={summary.total_outstanding}
+                          precision={2}
+                          styles={{ content: { color: '#faad14' } }}
+                          prefix={<DollarOutlined />}
+                          suffix="$"
+                        />
+                      </Card>
+                    </Col>
+                  </Row>
+                </>
+              ) : null,
             },
             {
               key: 'invoices',
               label: 'Invoices',
               children: (
-            <Card title="Invoice Management" loading={loading}>
-              <Table
-                columns={invoiceColumns}
-                dataSource={invoices}
-                rowKey="id"
-                pagination={{
-                  showSizeChanger: true,
-                  showQuickJumper: true,
-                  showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} invoices`,
-                }}
-              />
-            </Card>
+                <Card title="Invoice Management" loading={loading}>
+                  <Table
+                    columns={invoiceColumns}
+                    dataSource={invoices}
+                    rowKey="id"
+                    pagination={{
+                      showSizeChanger: true,
+                      showQuickJumper: true,
+                      showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} invoices`,
+                    }}
+                  />
+                </Card>
               ),
             },
             {
               key: 'expenses',
               label: 'Expenses',
               children: (
-            <Card title="Expense Management" loading={loading}>
-              <Table
-                columns={expenseColumns}
-                dataSource={expenses}
-                rowKey="id"
-                pagination={{
-                  showSizeChanger: true,
-                  showQuickJumper: true,
-                  showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} expenses`,
-                }}
-              />
-            </Card>
+                <Card title="Expense Management" loading={loading}>
+                  <Table
+                    columns={expenseColumns}
+                    dataSource={expenses}
+                    rowKey="id"
+                    pagination={{
+                      showSizeChanger: true,
+                      showQuickJumper: true,
+                      showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} expenses`,
+                    }}
+                  />
+                </Card>
               ),
             },
             {

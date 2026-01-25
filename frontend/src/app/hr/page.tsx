@@ -57,7 +57,7 @@ const { Option } = Select;
 export default function HRManagementPage() {
   const { data: employees, isLoading: employeesLoading } = useGetEmployeesQuery({});
   const { data: departments, isLoading: departmentsLoading } = useGetDepartmentsQuery({});
-  const { data: analytics, isLoading: analyticsLoading } = useGetHRAnalyticsQuery({});
+  const { data: analytics, isLoading: analyticsLoading } = useGetHRAnalyticsQuery();
   
   // Handle both paginated response (with results) and direct array
   const employeesList = Array.isArray(employees) 
@@ -93,7 +93,7 @@ export default function HRManagementPage() {
       key: 'employee',
       render: (record: Employee) => (
         <Space>
-          <Avatar icon={<UserOutlined />} src={record.user_info?.avatar} />
+          <Avatar icon={<UserOutlined />} />
           <div>
             <div className="font-semibold">{record.user_info?.full_name}</div>
             <Text type="secondary" className="text-xs">{record.employee_id}</Text>
@@ -137,12 +137,12 @@ export default function HRManagementPage() {
       render: (record: Employee) => (
         <div className="flex flex-wrap gap-1">
           {record.skills?.slice(0, 3).map((skill) => (
-            <Tag key={skill.id} size="small" color="green">
+            <Tag key={skill.id} color="green">
               {skill.skill_name}
             </Tag>
           ))}
           {record.skills?.length > 3 && (
-            <Tag size="small" color="default">
+            <Tag color="default">
               +{record.skills.length - 3} more
             </Tag>
           )}
@@ -430,7 +430,7 @@ export default function HRManagementPage() {
                 rules={[{ required: true, message: 'Please select department' }]}
               >
                 <Select placeholder="Select department">
-                  {departmentsList.map((dept) => (
+                  {departmentsList.map((dept: Department) => (
                     <Option key={dept.id} value={dept.name}>{dept.name}</Option>
                   ))}
                 </Select>

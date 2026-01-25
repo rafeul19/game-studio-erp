@@ -117,7 +117,7 @@ const ReportsPage: React.FC = () => {
   const exportReport = async (reportType: string, format: string) => {
     try {
       const params: any = {
-        report_type,
+        report_type: reportType,
         format,
       };
       
@@ -239,7 +239,7 @@ const ReportsPage: React.FC = () => {
   }
 
   return (
-    <DashboardLayout>
+    <AppLayout>
       <div style={{ padding: '24px' }}>
         <div style={{ marginBottom: '24px' }}>
           <Title level={2}>Reports & Analytics</Title>
@@ -368,7 +368,7 @@ const ReportsPage: React.FC = () => {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }: any) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="progress"
@@ -524,7 +524,7 @@ const ReportsPage: React.FC = () => {
           </TabPane>
         </Tabs>
       </div>
-    </DashboardLayout>
+    </AppLayout>
   );
 };
 

@@ -150,7 +150,15 @@ export const FileUploadComponent: React.FC<FileUploadComponentProps> = ({
     }
 
     // Set file info and preview
-    setFileInfo(file);
+    const uploadFile: UploadFile = {
+      uid: `-${Date.now()}`,
+      name: file.name,
+      status: 'done',
+      size: file.size,
+      type: file.type,
+      originFileObj: file as any,
+    };
+    setFileInfo(uploadFile);
     getPreviewImage(file).then((preview) => {
       setPreviewUrl(preview);
     });

@@ -19,6 +19,7 @@ import {
   Select,
   DatePicker,
   Input,
+  Modal,
 } from 'antd';
 import {
   BellOutlined,
@@ -292,7 +293,7 @@ const NotificationsPage: React.FC = () => {
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Text strong={!notification.read}>{notification.title}</Text>
-            <Tag color={getTypeColor(notification.type)} size="small">
+            <Tag color={getTypeColor(notification.type)}>
               {notification.type.replace('_', ' ')}
             </Tag>
           </div>
