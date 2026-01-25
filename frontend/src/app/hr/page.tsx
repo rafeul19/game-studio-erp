@@ -37,7 +37,7 @@ import {
   TrophyOutlined,
   EnvironmentOutlined,
 } from '@ant-design/icons';
-import { AppLayout } from '@/components/layout/AppLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import { 
   useGetEmployeesQuery, 
   useGetDepartmentsQuery, 

@@ -25,6 +25,7 @@ import {
   FileSearchOutlined,
   BugOutlined,
   TeamOutlined,
+  DollarOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -33,7 +34,7 @@ import { logout } from '@/store/slices/authSlice';
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
 
-export const AppLayout = ({ children }: { children: React.ReactNode }) => {
+const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -84,6 +85,11 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
       key: '/hr',
       icon: <TeamOutlined />,
       label: 'HR Management',
+    },
+    {
+      key: '/finance',
+      icon: <DollarOutlined />,
+      label: 'Finance',
     },
     {
       key: '/settings',

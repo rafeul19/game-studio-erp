@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Row, Col, Card, Statistic, Typography, Table, Tag, Space } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Row, Col, Card, Statistic, Typography, Table, Tag, Spin, Alert } from 'antd';
 import {
   ProjectOutlined,
   CheckCircleOutlined,
@@ -19,23 +19,17 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  LineChart,
-  Line,
   AreaChart,
   Area,
+  Line,
 } from 'recharts';
-import { AppLayout } from '@/components/layout/AppLayout';
+import AppLayout from '@/components/layout/AppLayout';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 const { Title, Text } = Typography;
 
-const sprintData = [
-  { name: 'Sprint 1', velocity: 45, bugs: 12 },
-  { name: 'Sprint 2', velocity: 52, bugs: 8 },
-  { name: 'Sprint 3', velocity: 48, bugs: 15 },
-  { name: 'Sprint 4', velocity: 61, bugs: 5 },
-  { name: 'Sprint 5', velocity: 55, bugs: 10 },
-];
-
+// Mock revenue for now as it wasn't in the initial scope of the fix, preserving UI
 const revenueData = [
   { month: 'Jan', revenue: 4000, cost: 2400 },
   { month: 'Feb', revenue: 3000, cost: 1398 },
@@ -71,13 +65,61 @@ const projectColumns = [
   },
 ];
 
-const projectData = [
-  { id: 1, name: 'Cyberpunk Odyssey', status: 'In Progress', progress: 65 },
-  { id: 2, name: 'Neon Knights', status: 'At Risk', progress: 40 },
-  { id: 3, name: 'Pixel Quest', status: 'Completed', progress: 100 },
-];
+interface DashboardStats {
+  active_projects: number;
+  completed_tasks: number;
+  pending_approval: number;
+  open_bugs: number;
+  sprint_data: any[];
+  project_data: any[];
+}
 
 export default function Dashboard() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/stats/`, { headers });
+        setStats(response.data);
+      } catch (err: any) {
+        if (err.response && err.response.status === 401) {
+             router.push('/login');
+             return;
+        }
+        console.error("Failed to fetch dashboard stats", err);
+        setError('Failed to load dashboard statistics.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="flex justify-center items-center h-screen">
+          <Spin size="large" tip="Loading Dashboard..." />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AppLayout>
+         <Alert message="Error" description={error} type="error" showIcon />
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout>
       <div className="mb-6">
@@ -90,11 +132,11 @@ export default function Dashboard() {
           <Card variant="borderless" className="shadow-sm">
             <Statistic
               title="Active Projects"
-              value={12}
+              value={stats?.active_projects || 0}
               prefix={<ProjectOutlined className="text-blue-500" />}
             />
             <div className="mt-2 text-green-500">
-              <ArrowUpOutlined /> <Text type="success">12% from last month</Text>
+              <ArrowUpOutlined /> <Text type="success">Live Data</Text>
             </div>
           </Card>
         </Col>
@@ -102,11 +144,11 @@ export default function Dashboard() {
           <Card variant="borderless" className="shadow-sm">
             <Statistic
               title="Tasks Completed"
-              value={154}
+              value={stats?.completed_tasks || 0}
               prefix={<CheckCircleOutlined className="text-green-500" />}
             />
             <div className="mt-2 text-green-500">
-              <ArrowUpOutlined /> <Text type="success">8.2% vs target</Text>
+              <ArrowUpOutlined /> <Text type="success">Total finished</Text>
             </div>
           </Card>
         </Col>
@@ -114,23 +156,23 @@ export default function Dashboard() {
           <Card variant="borderless" className="shadow-sm">
             <Statistic
               title="Pending Approval"
-              value={24}
+              value={stats?.pending_approval || 0}
               prefix={<ClockCircleOutlined className="text-orange-500" />}
             />
-            <div className="mt-2 text-red-500">
-              <ArrowUpOutlined /> <Text type="danger">Needs attention</Text>
+             <div className="mt-2 text-gray-500">
+              <Text type="secondary">In Review</Text>
             </div>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card variant="borderless" className="shadow-sm">
             <Statistic
-              title="Bugs Reported"
-              value={8}
+              title="Open Bugs"
+              value={stats?.open_bugs || 0}
               prefix={<WarningOutlined className="text-red-500" />}
             />
-            <div className="mt-2 text-green-500">
-               <ArrowDownOutlined /> <Text type="success">15% fewer than avg</Text>
+            <div className="mt-2 text-red-500">
+               <Text type="danger">Needs attention</Text>
             </div>
           </Card>
         </Col>
@@ -141,7 +183,7 @@ export default function Dashboard() {
           <Card title="Sprint Velocity & Trends" variant="borderless" className="shadow-sm">
             <div style={{ width: '100%', height: 350 }}>
               <ResponsiveContainer>
-                <BarChart data={sprintData}>
+                <BarChart data={stats?.sprint_data || []}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="name" />
                   <YAxis />
@@ -158,7 +200,7 @@ export default function Dashboard() {
           <Card title="Recent Projects" variant="borderless" className="shadow-sm">
             <Table
               columns={projectColumns}
-              dataSource={projectData}
+              dataSource={stats?.project_data || []}
               pagination={false}
               size="small"
               rowKey="id"

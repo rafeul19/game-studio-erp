@@ -25,7 +25,7 @@ import {
   FireOutlined,
   ClockCircleOutlined,
 } from '@ant-design/icons';
-import { AppLayout } from '@/components/layout/AppLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import { useGetTasksQuery, useUpdateTaskStatusMutation, useCreateTaskMutation, useLogWorkMutation } from '@/store/api/taskApi';
 import { useGetProjectsQuery, useSuggestStoryPointsMutation } from '@/store/api/projectApi';
 

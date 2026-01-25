@@ -24,7 +24,7 @@ import {
   MoreOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { AppLayout } from '@/components/layout/AppLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import { useGetBugsQuery, useCreateBugMutation, useUpdateBugMutation } from '@/store/api/bugApi';
 import { useGetProjectsQuery } from '@/store/api/projectApi';
 import { Bug } from '@/types/models';

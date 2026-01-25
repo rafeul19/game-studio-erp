@@ -27,7 +27,7 @@ import {
   CheckCircleOutlined,
   RobotOutlined,
 } from '@ant-design/icons';
-import { AppLayout } from '@/components/layout/AppLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import { RiskBadge } from '@/components/common/RiskBadge';
 import {
   useGetProjectSprintsQuery,

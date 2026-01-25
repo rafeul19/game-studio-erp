@@ -1,4 +1,2 @@
-asgiref==3.11.0
-Django==5.2.10
-sqlparse==0.5.5
-typing_extensions==4.15.0
+# This file is for reference only
+# Actual dependencies are in backend/requirements.txt

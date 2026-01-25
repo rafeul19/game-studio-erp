@@ -66,7 +66,7 @@ class EmployeeSkillSerializer(serializers.ModelSerializer):
 class EmployeeSerializer(serializers.ModelSerializer):
     """Employee profile serializer"""
     user_info = UserSerializer(source='user', read_only=True)
-    skills = EmployeeSkillSerializer(source='skills', many=True, read_only=True)
+    skills = EmployeeSkillSerializer(many=True, read_only=True)
     employment_status = serializers.ReadOnlyField()
     years_of_service = serializers.ReadOnlyField()
     department_name = serializers.CharField(source='department', read_only=True)

@@ -15,7 +15,7 @@ import {
   App,
 } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
-import { AppLayout } from '@/components/layout/AppLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import { useGetProjectsQuery, useCreateProjectMutation } from '@/store/api/projectApi';
 import { Project } from '@/types/models';
 

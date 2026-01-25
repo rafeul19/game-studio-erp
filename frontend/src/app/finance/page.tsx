@@ -31,8 +31,8 @@ import {
   EditOutlined,
   DeleteOutlined,
 } from '@ant-design/icons';
-import { useAppSelector } from '@/lib/redux/hooks';
-import { RootState } from '@/lib/redux/store';
+import { useAppSelector } from '@/store/hooks';
+import type { RootState } from '@/store/store';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import AppLayout from '@/components/layout/AppLayout';
 import { apiClient } from '@/lib/utils/api';

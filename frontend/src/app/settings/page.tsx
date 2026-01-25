@@ -25,7 +25,7 @@ import {
   LockOutlined,
   RocketOutlined,
 } from '@ant-design/icons';
-import { AppLayout } from '@/components/layout/AppLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import { useAppSelector } from '@/store/hooks';
 
 const { Title, Text } = Typography;

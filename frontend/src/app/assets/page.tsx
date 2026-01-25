@@ -30,7 +30,7 @@ import {
   WarningOutlined,
   UploadOutlined,
 } from '@ant-design/icons';
-import { AppLayout } from '@/components/layout/AppLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import { FileUploadComponent } from '@/components/assets/FileUploadComponent';
 import { useGetAssetsQuery, useCreateAssetMutation, useAddAssetVersionMutation } from '@/store/api/assetApi';
 import { useGetProjectsQuery, useDetectAssetReuseMutation, AssetReuseSuggestion } from '@/store/api/projectApi';
