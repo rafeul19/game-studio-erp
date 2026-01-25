@@ -1,0 +1,182 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.10]
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: test_erp_gamedev
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        cd backend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Cache pytest
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pytest
+        key: ${{ runner.os }}-pytest-${{ hashFiles('backend/**') }}
+        restore-keys: |
+          ${{ runner.os }}-pytest-
+
+    - name: Set up environment variables
+      run: |
+        cd backend
+        cat << EOF > .env
+        DEBUG=True
+        SECRET_KEY=test-secret-key-for-ci
+        DB_ENGINE=django.db.backends.postgresql
+        DB_NAME=test_erp_gamedev
+        DB_USER=test_user
+        DB_PASSWORD=test_password
+        DB_HOST=localhost
+        DB_PORT=5432
+        ALLOWED_HOSTS=localhost,127.0.0.1
+        CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+        REDIS_URL=redis://localhost:6379/0
+        CELERY_BROKER_URL=redis://localhost:6379/0
+        CELERY_RESULT_BACKEND=redis://localhost:6379/0
+        EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+        USE_S3=False
+        SECURE_SSL_REDIRECT=False
+        SESSION_COOKIE_SECURE=False
+        CSRF_COOKIE_SECURE=False
+        MEDIA_URL=/media/
+        STATIC_URL=/static/
+        EOF
+
+    - name: Run database migrations
+      run: |
+        cd backend
+        python manage.py migrate
+
+    - name: Run tests with coverage
+      run: |
+        cd backend
+        pytest --cov=. --cov-report=xml --cov-report=html --cov-report=term -v
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./backend/coverage.xml
+        flags: backend
+        name: backend-coverage
+        fail_ci_if_error: false
+
+    - name: Run flake8 linting
+      run: |
+        cd backend
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+
+    - name: Run black formatting check
+      run: |
+        cd backend
+        black --check --diff .
+
+    - name: Check security issues with bandit
+      run: |
+        cd backend
+        pip install bandit[toml]
+        bandit -r . -f json -o bandit-report.json || true
+        bandit -r . -f sarif -o bandit-report.sarif || true
+
+    - name: Upload security scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: ./backend/bandit-report.sarif
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: yourorg/erp-backend
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max

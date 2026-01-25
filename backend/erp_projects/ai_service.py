@@ -1,15 +1,23 @@
 from django.utils import timezone
 from .models import Sprint, Task
 from accounts.models import User
+from .ml.train_models import get_story_point_prediction, get_sprint_risk_prediction, get_asset_recommendations
 
 class AIEstimationService:
     @staticmethod
     def predict_sprint_risk(sprint):
         """
-        Predicts if a sprint is at risk of not completing.
-        - Risk if total points > average velocity of past 3 sprints.
-        - Risk if end date is too close and many tasks are TODO.
+        ML-based sprint risk prediction with fallback to heuristics.
         """
+        try:
+            # Try ML prediction first
+            ml_prediction = get_sprint_risk_prediction(sprint)
+            if ml_prediction:
+                return ml_prediction
+        except Exception:
+            pass
+        
+        # Fallback to heuristic
         total_points = sprint.total_story_points()
         past_sprints = Sprint.objects.filter(
             project=sprint.project,
@@ -27,11 +35,19 @@ class AIEstimationService:
         return "LOW"
 
     @staticmethod
-    def suggest_story_points(task_title, task_description):
+    def suggest_story_points(task_title, task_description, project_id=None):
         """
-        Simple heuristic-based suggestion.
-        In a real app, this would use an LLM or ML classifier.
+        ML-based story point suggestion with fallback to heuristics.
         """
+        try:
+            # Try ML prediction first
+            ml_prediction = get_story_point_prediction(task_title, task_description, project_id)
+            if ml_prediction:
+                return ml_prediction
+        except Exception:
+            pass
+        
+        # Fallback to heuristic
         complexity = 1
         words = (task_title + " " + task_description).lower().split()
         
@@ -49,10 +65,19 @@ class AIEstimationService:
     @staticmethod
     def detect_asset_reuse(project, task_title):
         """
-        Detects potential asset/code reuse from existing tasks and Assets in the project.
+        ML-based asset reuse detection with fallback to keyword matching.
         """
         from assets.models import Asset
         
+        try:
+            # Try ML recommendations first
+            ml_recommendations = get_asset_recommendations(project.id, task_title)
+            if ml_recommendations:
+                return ml_recommendations
+        except Exception:
+            pass
+        
+        # Fallback to keyword matching
         keywords = set(task_title.lower().replace(',', ' ').split())
         if len(keywords) < 2:
             return []

@@ -1,6 +1,8 @@
+from celery import shared_task
 from django.utils import timezone
 from .models import Sprint
 
+@shared_task
 def automate_sprint_lifecycle():
     """
     Automatically updates sprint statuses based on the current date.
