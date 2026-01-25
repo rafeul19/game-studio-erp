@@ -9,6 +9,7 @@ from accounts.views import (
     management_dashboard,
     health_check,
     profile_view,
+    dashboard_stats,
 )
 
 from erp_projects.views import (
@@ -45,6 +46,7 @@ urlpatterns = [
     # Dashboards
     path('api/admin/dashboard/', admin_dashboard),
     path('api/management/dashboard/', management_dashboard),
+    path('api/dashboard/stats/', dashboard_stats),
 
     # Projects
     path('api/projects/create/', create_project),

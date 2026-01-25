@@ -53,6 +53,7 @@ services:
         condition: service_healthy
     environment:
       - DB_HOST=db
+      - DB_ENGINE=django.db.backends.postgresql
       - REDIS_URL=redis://redis:6379/0
 
   # Celery Worker
@@ -69,6 +70,7 @@ services:
       - redis
     environment:
       - DB_HOST=db
+      - DB_ENGINE=django.db.backends.postgresql
       - REDIS_URL=redis://redis:6379/0
 
   # Celery Beat (Scheduled Tasks)
@@ -85,6 +87,7 @@ services:
       - redis
     environment:
       - DB_HOST=db
+      - DB_ENGINE=django.db.backends.postgresql
       - REDIS_URL=redis://redis:6379/0
 
   # Next.js Frontend
