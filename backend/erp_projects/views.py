@@ -33,7 +33,11 @@ def project_progress(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     return Response({
         "project": project.name,
-        "progress": project.progress_percentage()
+        "progress_percentage": project.progress_percentage(),
+        "tasks_by_status": {
+            status_val: project.tasks.filter(status=status_val).count()
+            for status_val, _ in Task.STATUS_CHOICES
+        }
     })
 
 @api_view(['GET'])
@@ -110,7 +114,9 @@ def sprint_progress(request, sprint_id):
     sprint = get_object_or_404(Sprint, id=sprint_id)
     return Response({
         "sprint": sprint.name,
-        "progress": sprint.progress_percentage()
+        "progress_percentage": sprint.progress_percentage(),
+        "velocity": sprint.velocity(),
+        "total_points": sprint.total_story_points()
     })
 
 # --- Reports ---

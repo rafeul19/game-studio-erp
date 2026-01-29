@@ -8,11 +8,11 @@ class User(AbstractUser):
     """
 
     # ✅ ROLE CONSTANTS (single source of truth)
-    ADMIN = 'admin'
-    MANAGER = 'manager'
-    DEVELOPER = 'developer'
-    ARTIST = 'artist'
-    QA = 'qa'
+    ADMIN = 'ADMIN'
+    MANAGER = 'MANAGER'
+    DEVELOPER = 'DEVELOPER'
+    ARTIST = 'ARTIST'
+    QA = 'QA'
 
     ROLE_CHOICES = (
         (ADMIN, 'Admin'),

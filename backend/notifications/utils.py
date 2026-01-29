@@ -6,6 +6,9 @@ def notify_user(recipient, verb, actor=None, target=None):
     """
     Creates an in-app notification and sends an email.
     """
+    if not recipient:
+        return None
+        
     notification = Notification.objects.create(
         recipient=recipient,
         actor=actor,

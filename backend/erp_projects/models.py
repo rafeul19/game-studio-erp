@@ -17,17 +17,28 @@ class Project(models.Model):
     )
     budget_type = models.CharField(max_length=20, choices=[('FIXED', 'Fixed Budget'), ('T&M', 'Time & Materials')], default='FIXED')
     total_budget = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[('PLANNING', 'Planning'), ('ACTIVE', 'Active'), ('ON_HOLD', 'On Hold'), ('COMPLETED', 'Completed'), ('CANCELLED', 'Cancelled')],
+        default='PLANNING'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
 
     def progress_percentage(self):
-        total = self.tasks.count()
-        if total == 0:
+        from django.db.models import Sum
+        total_points = self.tasks.aggregate(Sum('story_points'))['story_points__sum'] or 0
+        if total_points == 0:
             return 0
-        done = self.tasks.filter(status='DONE').count()
-        return int((done / total) * 100)
+        done_points = self.tasks.filter(status='DONE').aggregate(Sum('story_points'))['story_points__sum'] or 0
+        return (done_points / total_points) * 100
+
+    def budget_remaining(self):
+        return self.total_budget
 
 
 class Sprint(models.Model):
@@ -122,6 +133,12 @@ class Task(models.Model):
     )
     story_points = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_overdue(self):
+        if self.due_date and self.status != self.DONE:
+            from django.utils import timezone
+            return self.due_date < timezone.now().date()
+        return False
 
     def __str__(self):
         return self.title

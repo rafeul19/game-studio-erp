@@ -101,7 +101,7 @@ class LeaveRequestSerializer(serializers.ModelSerializer):
             'approved_by_name', 'approval_date', 'approval_comments',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['approved_by', 'approval_date', 'created_at', 'updated_at']
+        read_only_fields = ['employee', 'approved_by', 'approval_date', 'created_at', 'updated_at']
 
 
 class PerformanceReviewSerializer(serializers.ModelSerializer):
