@@ -82,7 +82,7 @@ const ReportsPage: React.FC = () => {
 
   const fetchProjects = async () => {
     try {
-      const response = await apiClient.get('/api/projects/my/');
+      const response = await apiClient.get('projects/my/');
       setProjects(response.data.results || response.data);
     } catch (error) {
       console.error('Failed to fetch projects:', error);
@@ -105,7 +105,7 @@ const ReportsPage: React.FC = () => {
         params.team_id = selectedTeam;
       }
 
-      const response = await apiClient.get('/api/reports/analytics/', { params });
+      const response = await apiClient.get('reports/analytics/', { params });
       setReportData(response.data);
     } catch (error) {
       console.error('Failed to fetch report data:', error);
@@ -126,7 +126,7 @@ const ReportsPage: React.FC = () => {
         params.end_date = dateRange[1].format('YYYY-MM-DD');
       }
 
-      const response = await apiClient.get('/api/reports/export/', {
+      const response = await apiClient.get('reports/export/', {
         params,
         responseType: 'blob',
       });

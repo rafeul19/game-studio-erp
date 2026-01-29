@@ -30,6 +30,99 @@ import { useAppSelector } from '@/store/hooks';
 
 const { Title, Text } = Typography;
 
+const AppearanceSettings = ({ onSave }: { onSave: () => void }) => (
+  <div className="max-w-xl">
+    <Space direction="vertical" size="large" className="w-full">
+      <div>
+        <Text strong>Theme Customization</Text>
+        <div className="mt-4 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
+          <Space direction="vertical" size={0}>
+            <Text>Dark Mode</Text>
+            <Text type="secondary" className="text-xs">Optimized for game studio lighting environments</Text>
+          </Space>
+          <Switch defaultChecked disabled />
+        </div>
+      </div>
+      <div>
+        <Text strong>Interface</Text>
+        <div className="mt-4 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
+          <Space direction="vertical" size={0}>
+            <Text>Compact Sidebar</Text>
+            <Text type="secondary" className="text-xs">Maximize screen space for project boards</Text>
+          </Space>
+          <Switch />
+        </div>
+      </div>
+      <Button type="primary" onClick={onSave}>Save Changes</Button>
+    </Space>
+  </div>
+);
+
+const NotificationSettings = ({ onSave }: { onSave: () => void }) => (
+  <div className="max-w-xl">
+    <Space direction="vertical" size="large" className="w-full">
+      <div>
+        <Text strong>Studio Alerts</Text>
+        <div className="mt-4 space-y-2">
+          {[
+            { label: 'Asset Reuse Warnings', desc: 'Notify when duplicate assets are detected' },
+            { label: 'Sprint Risk Alerts', desc: 'AI-driven notifications for delayed sprints' },
+            { label: 'Task Assignments', desc: 'Real-time alert when a task is moved to your column' },
+          ].map((item, i) => (
+            <div key={i} className="flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
+              <Space direction="vertical" size={0}>
+                <Text>{item.label}</Text>
+                <Text type="secondary" className="text-xs">{item.desc}</Text>
+              </Space>
+              <Switch defaultChecked />
+            </div>
+          ))}
+        </div>
+      </div>
+      <Button type="primary" onClick={onSave}>Update Preferences</Button>
+    </Space>
+  </div>
+);
+
+const ProfileSettings = ({ user, onSave }: { user: any, onSave: () => void }) => (
+  <Form layout="vertical" className="max-w-xl">
+    <Row gutter={24} className="mb-8">
+      <Col>
+         <Avatar size={100} icon={<UserOutlined />} src={user?.avatar} className="border-4 border-blue-500/20 shadow-xl" />
+      </Col>
+      <Col className="flex flex-col justify-center">
+         <Title level={3} className="m-0">{user?.username || 'Studio User'}</Title>
+         <Space>
+            <Tag color="blue">{user?.role?.toUpperCase() || 'DEVELOPER'}</Tag>
+            <Text type="secondary">Member since Jan 2026</Text>
+         </Space>
+         <Button size="small" className="mt-2 text-xs w-fit">Change Avatar</Button>
+      </Col>
+    </Row>
+    
+    <Divider />
+
+    <Row gutter={16}>
+      <Col span={12}>
+        <Form.Item label="Display Name">
+          <Input defaultValue={user?.username} />
+        </Form.Item>
+      </Col>
+      <Col span={12}>
+        <Form.Item label="Email Address">
+          <Input placeholder="yourname@studio.com" />
+        </Form.Item>
+      </Col>
+    </Row>
+    
+    <Form.Item label="Bio / Skills">
+      <Input.TextArea rows={4} placeholder="e.g. Senior Technical Artist | Unreal Engine 5 Specialist" />
+    </Form.Item>
+
+    <Button type="primary" onClick={onSave}>Update Profile</Button>
+  </Form>
+);
+
 export default function SettingsPage() {
   const { user } = useAppSelector((state) => state.auth);
   const { message } = App.useApp();
@@ -37,99 +130,6 @@ export default function SettingsPage() {
   const handleSave = () => {
     message.success('Settings updated successfully');
   };
-
-  const AppearanceSettings = () => (
-    <div className="max-w-xl">
-      <Space direction="vertical" size="large" className="w-full">
-        <div>
-          <Text strong>Theme Customization</Text>
-          <div className="mt-4 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
-            <Space direction="vertical" size={0}>
-              <Text>Dark Mode</Text>
-              <Text type="secondary" className="text-xs">Optimized for game studio lighting environments</Text>
-            </Space>
-            <Switch defaultChecked disabled />
-          </div>
-        </div>
-        <div>
-          <Text strong>Interface</Text>
-          <div className="mt-4 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
-            <Space direction="vertical" size={0}>
-              <Text>Compact Sidebar</Text>
-              <Text type="secondary" className="text-xs">Maximize screen space for project boards</Text>
-            </Space>
-            <Switch />
-          </div>
-        </div>
-        <Button type="primary" onClick={handleSave}>Save Changes</Button>
-      </Space>
-    </div>
-  );
-
-  const NotificationSettings = () => (
-    <div className="max-w-xl">
-      <Space direction="vertical" size="large" className="w-full">
-        <div>
-          <Text strong>Studio Alerts</Text>
-          <div className="mt-4 space-y-2">
-            {[
-              { label: 'Asset Reuse Warnings', desc: 'Notify when duplicate assets are detected' },
-              { label: 'Sprint Risk Alerts', desc: 'AI-driven notifications for delayed sprints' },
-              { label: 'Task Assignments', desc: 'Real-time alert when a task is moved to your column' },
-            ].map((item, i) => (
-              <div key={i} className="flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg">
-                <Space direction="vertical" size={0}>
-                  <Text>{item.label}</Text>
-                  <Text type="secondary" className="text-xs">{item.desc}</Text>
-                </Space>
-                <Switch defaultChecked />
-              </div>
-            ))}
-          </div>
-        </div>
-        <Button type="primary" onClick={handleSave}>Update Preferences</Button>
-      </Space>
-    </div>
-  );
-
-  const ProfileSettings = () => (
-    <Form layout="vertical" className="max-w-xl">
-      <Row gutter={24} className="mb-8">
-        <Col>
-           <Avatar size={100} icon={<UserOutlined />} src={user?.avatar} className="border-4 border-blue-500/20 shadow-xl" />
-        </Col>
-        <Col className="flex flex-col justify-center">
-           <Title level={3} className="m-0">{user?.username || 'Studio User'}</Title>
-           <Space>
-              <Tag color="blue">{user?.role?.toUpperCase() || 'DEVELOPER'}</Tag>
-              <Text type="secondary">Member since Jan 2026</Text>
-           </Space>
-           <Button size="small" className="mt-2 text-xs w-fit">Change Avatar</Button>
-        </Col>
-      </Row>
-      
-      <Divider />
-
-      <Row gutter={16}>
-        <Col span={12}>
-          <Form.Item label="Display Name">
-            <Input defaultValue={user?.username} />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item label="Email Address">
-            <Input placeholder="yourname@studio.com" />
-          </Form.Item>
-        </Col>
-      </Row>
-      
-      <Form.Item label="Bio / Skills">
-        <Input.TextArea rows={4} placeholder="e.g. Senior Technical Artist | Unreal Engine 5 Specialist" />
-      </Form.Item>
-
-      <Button type="primary" onClick={handleSave}>Update Profile</Button>
-    </Form>
-  );
 
   const tabItems = [
     {
@@ -140,7 +140,7 @@ export default function SettingsPage() {
           Profile
         </span>
       ),
-      children: <ProfileSettings />,
+      children: <ProfileSettings user={user} onSave={handleSave} />,
     },
     {
       key: 'appearance',
@@ -150,7 +150,7 @@ export default function SettingsPage() {
           Appearance
         </span>
       ),
-      children: <AppearanceSettings />,
+      children: <AppearanceSettings onSave={handleSave} />,
     },
     {
       key: 'notifications',
@@ -160,7 +160,7 @@ export default function SettingsPage() {
           Notifications
         </span>
       ),
-      children: <NotificationSettings />,
+      children: <NotificationSettings onSave={handleSave} />,
     },
     {
       key: 'security',

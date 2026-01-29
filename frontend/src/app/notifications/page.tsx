@@ -143,7 +143,7 @@ const NotificationsPage: React.FC = () => {
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/api/notifications/');
+      const response = await apiClient.get('notifications/');
       setNotifications(response.data.results || response.data);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
@@ -186,7 +186,7 @@ const NotificationsPage: React.FC = () => {
 
   const markAllAsRead = async () => {
     try {
-      await apiClient.post('/api/notifications/mark-all-read/');
+      await apiClient.post('notifications/mark-all-read/');
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error);
@@ -204,7 +204,7 @@ const NotificationsPage: React.FC = () => {
 
   const updateSettings = async (newSettings: NotificationSettings) => {
     try {
-      await apiClient.put('/api/notifications/settings/', newSettings);
+      await apiClient.put('notifications/settings/', newSettings);
       setSettings(newSettings);
       setSettingsVisible(false);
     } catch (error) {

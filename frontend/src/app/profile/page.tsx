@@ -94,7 +94,7 @@ const ProfilePage: React.FC = () => {
   const fetchProfile = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/api/profile/');
+      const response = await apiClient.get('profile/');
       setProfile(response.data);
       form.setFieldsValue(response.data);
     } catch (error) {
@@ -106,7 +106,7 @@ const ProfilePage: React.FC = () => {
 
   const handleProfileUpdate = async (values: any) => {
     try {
-      await apiClient.put('/api/profile/', values);
+      await apiClient.put('profile/', values);
       setProfile(prev => ({ ...prev!, ...values }));
       setEditMode(false);
       message.success('Profile updated successfully');
@@ -117,7 +117,7 @@ const ProfilePage: React.FC = () => {
 
   const handlePasswordChange = async (values: any) => {
     try {
-      await apiClient.post('/api/change-password/', values);
+      await apiClient.post('change-password/', values);
       setPasswordModalVisible(false);
       passwordForm.resetFields();
       message.success('Password changed successfully');
@@ -131,7 +131,7 @@ const ProfilePage: React.FC = () => {
     formData.append('avatar', file);
 
     try {
-      await apiClient.post('/api/profile/upload-avatar/', formData);
+      await apiClient.post('profile/upload-avatar/', formData);
       message.success('Avatar updated successfully');
       fetchProfile();
     } catch (error) {

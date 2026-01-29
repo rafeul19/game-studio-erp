@@ -120,7 +120,7 @@ class Invoice(models.Model):
         return f"INV-{self.invoice_number}"
 
     def save(self, *args, **kwargs):
-        self.tax_amount = self.amount * (self.tax_rate / 100)
+        self.tax_amount = self.amount * (Decimal(str(self.tax_rate)) / Decimal('100'))
         self.total_amount = self.amount + self.tax_amount
         super().save(*args, **kwargs)
 

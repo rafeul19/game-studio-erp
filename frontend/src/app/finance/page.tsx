@@ -35,106 +35,47 @@ import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import AppLayout from '@/components/layout/AppLayout';
-import { apiClient } from '@/lib/utils/api';
+import { 
+  useGetInvoicesQuery, 
+  useGetExpensesQuery, 
+  useGetBudgetsQuery, 
+  useGetFinanceAnalyticsQuery 
+} from '@/store/api/financeApi';
+import type { Invoice, Expense, Budget } from '@/store/api/financeApi';
+import dayjs from 'dayjs';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-interface FinancialSummary {
-  total_revenue: number;
-  total_expenses: number;
-  net_profit: number;
-  profit_margin: number;
-  total_invoices: number;
-  unpaid_invoices: number;
-  overdue_invoices: number;
-  total_outstanding: number;
-  payroll_expense: number;
-  operational_expenses: number;
-}
-
-interface Invoice {
-  id: number;
-  invoice_number: string;
-  client_name: string;
-  amount: number;
-  total_amount: number;
-  status: string;
-  status_display: string;
-  issue_date: string;
-  due_date: string;
-  days_overdue: number;
-  is_overdue: boolean;
-}
-
-interface Expense {
-  id: number;
-  category: string;
-  category_display: string;
-  amount: number;
-  date: string;
-  description: string;
-  vendor: string;
-  approved: boolean;
-}
-
-interface Budget {
-  id: number;
-  name: string;
-  budget_type_display: string;
-  allocated_amount: number;
-  spent_amount: number;
-  remaining_amount: number;
-  utilization_percentage: number;
-  is_over_budget: boolean;
-  status_color: string;
-}
-
 const FinancePage: React.FC = () => {
   const { user } = useAppSelector((state: RootState) => state.auth);
-  const [loading, setLoading] = useState(false);
-  const [summary, setSummary] = useState<FinancialSummary | null>(null);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [monthlyTrends, setMonthlyTrends] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [dateRange, setDateRange] = useState<any>(null);
+  const [params, setParams] = useState<any>({});
 
   useEffect(() => {
-    fetchFinancialData();
+    if (dateRange) {
+      setParams({
+        start_date: dateRange[0].format('YYYY-MM-DD'),
+        end_date: dateRange[1].format('YYYY-MM-DD'),
+      });
+    } else {
+      setParams({});
+    }
   }, [dateRange]);
 
-  const fetchFinancialData = async () => {
-    setLoading(true);
-    try {
-      const params: any = {};
-      if (dateRange) {
-        params.start_date = dateRange[0].format('YYYY-MM-DD');
-        params.end_date = dateRange[1].format('YYYY-MM-DD');
-      }
+  const { data: summary, isLoading: summaryLoading } = useGetFinanceAnalyticsQuery(params);
+  const { data: invoices, isLoading: invoicesLoading } = useGetInvoicesQuery({});
+  const { data: expenses, isLoading: expensesLoading } = useGetExpensesQuery({});
+  const { data: budgets, isLoading: budgetsLoading } = useGetBudgetsQuery({});
 
-      const [summaryRes, invoicesRes, expensesRes, budgetsRes] = await Promise.all([
-        apiClient.get('/api/finance/analytics/', { params }),
-        apiClient.get('/api/finance/invoices/'),
-        apiClient.get('/api/finance/expenses/'),
-        apiClient.get('/api/finance/budgets/'),
-      ]);
+  const loading = summaryLoading || invoicesLoading || expensesLoading || budgetsLoading;
 
-      setSummary(summaryRes.data);
-      setInvoices(invoicesRes.data.results || invoicesRes.data);
-      setExpenses(expensesRes.data.results || expensesRes.data);
-      setBudgets(budgetsRes.data.results || budgetsRes.data);
-      
-      if (summaryRes.data.monthly_trends) {
-        setMonthlyTrends(summaryRes.data.monthly_trends);
-      }
-    } catch (error) {
-      message.error('Failed to fetch financial data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const invoicesList = Array.isArray(invoices) ? invoices : (invoices as any)?.results || [];
+  const expensesList = Array.isArray(expenses) ? expenses : (expenses as any)?.results || [];
+  const budgetsList = Array.isArray(budgets) ? budgets : (budgets as any)?.results || [];
+  
+  const monthlyTrends = summary?.monthly_trends || [];
 
   const invoiceColumns = [
     {
@@ -453,7 +394,7 @@ const FinancePage: React.FC = () => {
                 <Card title="Invoice Management" loading={loading}>
                   <Table
                     columns={invoiceColumns}
-                    dataSource={invoices}
+                    dataSource={invoicesList}
                     rowKey="id"
                     pagination={{
                       showSizeChanger: true,
@@ -471,7 +412,7 @@ const FinancePage: React.FC = () => {
                 <Card title="Expense Management" loading={loading}>
                   <Table
                     columns={expenseColumns}
-                    dataSource={expenses}
+                    dataSource={expensesList}
                     rowKey="id"
                     pagination={{
                       showSizeChanger: true,
@@ -489,7 +430,7 @@ const FinancePage: React.FC = () => {
                 <Card title="Budget Tracking" loading={loading}>
                   <Table
                     columns={budgetColumns}
-                    dataSource={budgets}
+                    dataSource={budgetsList}
                     rowKey="id"
                     pagination={{
                       showSizeChanger: true,
